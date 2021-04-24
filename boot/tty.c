@@ -12,7 +12,7 @@ tty_init(void)
 
 	tty.row = 0;
 	tty.col = 0;
-	tty.color = _COLOR(VGA_LIGHT_GREY, VGA_BLUE);
+	tty.color = _COLOR(VGA_GREEN, VGA_BLACK);
 	tty.buf = (uint16_t *)0xb8000;
 	for (x = 0; x < VGA_COLS; x++)
 		for (y = 0; y < VGA_ROWS; y++)
@@ -42,12 +42,12 @@ tty_putc(char c)
 	}
 
 	if (tty.row >= VGA_ROWS) {
-		tty.row++;
+		tty.row = 0;
 		tty.col = 0;
 	}
 	if (tty.col >= VGA_COLS) {
+		tty.row++;
 		tty.col = 0;
-		tty.row = 0;
 	}
 }
 

@@ -157,6 +157,7 @@ lm_check:
 lm_fail:
 	popa
 	call	kernel_exec
+	jmp	$		; Safety hang.
 
 ; We'll check for (and switch to) Long Mode here.
 lm_enter:

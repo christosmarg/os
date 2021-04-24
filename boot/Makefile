@@ -14,7 +14,11 @@ SRC = *.c *.asm
 OBJ = loader.o \
       kernel.o \
       string.o \
-      tty.o
+      tty.o \
+      idt.o \
+      int.o \
+      kbd.o \
+      timer.o
 
 all: options ${BIN}
 
@@ -33,7 +37,7 @@ ${BIN}: ${OBJ}
 	dd if=/dev/zero bs=1000000 count=1 >> ${KERNEL_BIN}
 	cat ${BOOT_BIN} ${KERNEL_BIN} > $@
 
-c.o:
+.c.o:
 	${CC} -c ${CFLAGS} $<
 
 .asm.o:

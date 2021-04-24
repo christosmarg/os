@@ -8,3 +8,4 @@ run:
 
 clean:
 	rm -rf ${TGTDIR}
+	cd boot && make clean && cd ..
