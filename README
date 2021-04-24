@@ -1,0 +1,13 @@
+My OS
+=====
+Linux users are afraid of it.
+
+Build
+-----
+	$ make
+	$ make run
+
+Features
+--------
+- Own bootloader, no GRUB bloat.
+- Nothing else yet.
