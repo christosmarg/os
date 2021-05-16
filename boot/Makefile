@@ -12,7 +12,7 @@ BOOT_BIN = boot.bin
 KERNEL_BIN = kernel.bin
 SRC = *.c *.asm
 OBJ = loader.o \
-      kernel.o \
+      kmain.o \
       string.o \
       tty.o \
       idt.o \
@@ -46,10 +46,7 @@ ${BIN}: ${OBJ}
 install: all
 	mv ${BIN} ${BINDIR}
 
-run: all
-	qemu-system-i386 -hdd ${BINDIR}/${BIN}
-
 clean:
 	rm -rf *.bin *.o
 
-.PHONY: options all install run clean
+.PHONY: options all install clean

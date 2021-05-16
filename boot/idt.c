@@ -1,12 +1,14 @@
 #include "extern.h"
 #include "idt.h"
+#include "port.h"
+
+#define N_INT 256 /* There are 256 interrupts in total. */
+#define KERN_CODESEG 0x08 /* Kernel code segment. */
 
 static void idt_set_gate(uint8_t, uint32_t);
 
 static struct idt_gate idt[N_INT];
-static struct idt_reg idtr;
-static void *irq_routines[16] = {NULL};
-
+static void *isr[16] = {NULL};
 /* Exception messages for the first 32 ISRs. */
 static const char *except[] = {
 	"Division By Zero Exception",
@@ -49,61 +51,69 @@ idt_set_gate(uint8_t n, uint32_t ptr)
 	idt[n].off_lo = ptr & 0xffff;
 	idt[n].sel = KERN_CODESEG;
 	idt[n].zero = 0;
-	idt[n].attr = 0x8e; /* The gate is present and is running in kernel mode. */
+	/* The gate is present and is running in kernel mode. */
+	idt[n].flags = 0x8e;
 	idt[n].off_hi = (ptr >> 16) & 0xffff;
 }
 
 void
 idt_init(void)
 {
-	/* Set up the ISRs */
-	idt_set_gate(0, (uint32_t)isr0);
-	idt_set_gate(1, (uint32_t)isr1);
-	idt_set_gate(2, (uint32_t)isr2);
-	idt_set_gate(3, (uint32_t)isr3);
-	idt_set_gate(4, (uint32_t)isr4);
-	idt_set_gate(5, (uint32_t)isr5);
-	idt_set_gate(6, (uint32_t)isr6);
-	idt_set_gate(7, (uint32_t)isr7);
-	idt_set_gate(8, (uint32_t)isr8);
-	idt_set_gate(9, (uint32_t)isr9);
-	idt_set_gate(10, (uint32_t)isr10);
-	idt_set_gate(11, (uint32_t)isr11);
-	idt_set_gate(12, (uint32_t)isr12);
-	idt_set_gate(13, (uint32_t)isr13);
-	idt_set_gate(14, (uint32_t)isr14);
-	idt_set_gate(15, (uint32_t)isr15);
-	idt_set_gate(16, (uint32_t)isr16);
-	idt_set_gate(17, (uint32_t)isr17);
-	idt_set_gate(18, (uint32_t)isr18);
-	idt_set_gate(19, (uint32_t)isr19);
-	idt_set_gate(20, (uint32_t)isr20);
-	idt_set_gate(21, (uint32_t)isr21);
-	idt_set_gate(22, (uint32_t)isr22);
-	idt_set_gate(23, (uint32_t)isr23);
-	idt_set_gate(24, (uint32_t)isr24);
-	idt_set_gate(25, (uint32_t)isr25);
-	idt_set_gate(26, (uint32_t)isr26);
-	idt_set_gate(27, (uint32_t)isr27);
-	idt_set_gate(28, (uint32_t)isr28);
-	idt_set_gate(29, (uint32_t)isr29);
-	idt_set_gate(30, (uint32_t)isr30);
-	idt_set_gate(31, (uint32_t)isr31);
+	struct idt_reg {
+		uint16_t limit;	/* Points at IDT[0]. */
+		uint32_t base;	/* Points at the end of the IDT. */
+	} __attribute__((packed)) idtr;
+
+	(void)memset(&idt, 0, sizeof(idt));
+
+	/* Set up exception interrupts. */
+	idt_set_gate(0, (uint32_t)ex0);
+	idt_set_gate(1, (uint32_t)ex1);
+	idt_set_gate(2, (uint32_t)ex2);
+	idt_set_gate(3, (uint32_t)ex3);
+	idt_set_gate(4, (uint32_t)ex4);
+	idt_set_gate(5, (uint32_t)ex5);
+	idt_set_gate(6, (uint32_t)ex6);
+	idt_set_gate(7, (uint32_t)ex7);
+	idt_set_gate(8, (uint32_t)ex8);
+	idt_set_gate(9, (uint32_t)ex9);
+	idt_set_gate(10, (uint32_t)ex10);
+	idt_set_gate(11, (uint32_t)ex11);
+	idt_set_gate(12, (uint32_t)ex12);
+	idt_set_gate(13, (uint32_t)ex13);
+	idt_set_gate(14, (uint32_t)ex14);
+	idt_set_gate(15, (uint32_t)ex15);
+	idt_set_gate(16, (uint32_t)ex16);
+	idt_set_gate(17, (uint32_t)ex17);
+	idt_set_gate(18, (uint32_t)ex18);
+	idt_set_gate(19, (uint32_t)ex19);
+	idt_set_gate(20, (uint32_t)ex20);
+	idt_set_gate(21, (uint32_t)ex21);
+	idt_set_gate(22, (uint32_t)ex22);
+	idt_set_gate(23, (uint32_t)ex23);
+	idt_set_gate(24, (uint32_t)ex24);
+	idt_set_gate(25, (uint32_t)ex25);
+	idt_set_gate(26, (uint32_t)ex26);
+	idt_set_gate(27, (uint32_t)ex27);
+	idt_set_gate(28, (uint32_t)ex28);
+	idt_set_gate(29, (uint32_t)ex29);
+	idt_set_gate(30, (uint32_t)ex30);
+	idt_set_gate(31, (uint32_t)ex31);
 
 	/* Remap the PIC */
 	/* TODO: explain.*/
-	outb(0x11, 0x20);
-	outb(0x11, 0xa0);
-	outb(0x20, 0x21);
-	outb(0x28, 0xa1);
-	outb(0x04, 0x21);
-	outb(0x02, 0xa1);
-	outb(0x01, 0x21);
-	outb(0x01, 0xa1);
-	outb(0x00, 0x21);
-	outb(0x00, 0xa1);
+	outb(P_PIC1_CMD, 0x11);
+	outb(P_PIC2_CMD, 0x11);
+	outb(P_PIC1_DATA, 0x20);
+	outb(P_PIC2_DATA, 0x28);
+	outb(P_PIC1_DATA, 0x04);
+	outb(P_PIC2_DATA, 0x02);
+	outb(P_PIC1_DATA, 0x01);
+	outb(P_PIC2_DATA, 0x01);
+	outb(P_PIC1_DATA, 0x00);
+	outb(P_PIC2_DATA, 0x00);
 
-	/* Set up the IRQs */
+	/* Set up IRQs */
 	idt_set_gate(32, (uint32_t)irq0);
 	idt_set_gate(33, (uint32_t)irq1);
 	idt_set_gate(34, (uint32_t)irq2);
@@ -128,41 +138,30 @@ idt_init(void)
 	__asm__ __volatile__ ("lidtl (%0)" : : "r" (&idtr));
 }
 
-/* TODO: add comments */
 void
-isr_handler(struct reg *r)
+int_handler(struct reg *r)
 {
-	/* XXX: 31? */
-	if (r->intno < 32) {
+	void (*handler)(struct reg *);
+
+	/*
+	 * We'll call the handler only if the interrupt number is > 32,
+	 * which means that we're dealing with an IRQ and not an exception.
+	 */
+	if (r->intno >= 32 && (handler = isr[r->intno - 32]) != 0)
+		handler(r);
+	/* Entries below index 32 in the IDT are exceptions, we need to hang. */
+	else if (r->intno < 32) {
 		tty_write(except[r->intno]);
 		tty_write(". System halted...\n");
 		__asm__ __volatile__ ("hlt");
 	}
-}
-
-/* TODO: add comments */
-void
-irq_handler(struct reg *r)
-{
-	void (*handler)(struct reg *);
-
-	if ((handler = irq_routines[r->intno - 32]) != 0)
-		handler(r);
 	if (r->intno >= 40)
-		outb(0x20, 0xa0);
-	outb(0x20, 0x20);
+		outb(P_PIC2_CMD, 0x20);
+	outb(P_PIC1_CMD, 0x20);
 }
 
-/* TODO: add comments */
 void
-irq_add_handler(uint8_t irqno, void (*handler)(struct reg *r))
+int_add_handler(uint8_t intno, void (*handler)(struct reg *r))
 {
-	irq_routines[irqno] = handler;
-}
-
-/* TODO: add comments */
-void
-irq_rm_handler(uint8_t irqno)
-{
-	irq_routines[irqno] = NULL;
+	isr[intno] = handler;
 }

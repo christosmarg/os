@@ -1,27 +1,18 @@
-#ifndef _KERNEL_IDT_H
-#define _KERNEL_IDT_H
-
-#define N_INT 256 /* There are 256 interrupts in total. */
-#define KERN_CODESEG 0x08 /* Kernel code segment. */
-
-struct idt_reg {
-	uint16_t limit;	/* Points at &IDT. */
-	uint32_t base;	/* Points at the end of the IDT. */
-} __attribute__((packed));
+#ifndef _KERNEL_IDT_H_
+#define _KERNEL_IDT_H_
 
 /* IA-32 */
 struct idt_gate {
 	uint16_t off_lo;
 	uint16_t sel;
 	uint8_t zero;
-	uint8_t attr;
+	uint8_t flags;
 	uint16_t off_hi;
 } __attribute__((packed));
 
-
-/* This will be populated by isr_common_stub. */
+/* This will be populated by int_common_stub. */
 struct reg {
-	/* Segment registers. Will be poped last. */
+	/* Segment registers. Will be popped last. */
 	uint32_t gs;
 	uint32_t fs;
 	uint32_t es;
@@ -35,7 +26,7 @@ struct reg {
 	uint32_t edx;
 	uint32_t ecx;
 	uint32_t eax;
-	/* ISR info. Pushed by `push byte`. */
+	/* Interrupt info. Pushed by `push byte`. */
 	uint32_t intno;
 	uint32_t err;
 	/* Pushed by the processor. */
@@ -49,44 +40,43 @@ struct reg {
 /* `kernel_main` calls this. */
 extern void idt_init(void);
 
-extern void isr_handler(struct reg *);
-extern void irq_handler(struct reg *);
-extern void irq_add_handler(uint8_t, void (*)(struct reg *));
-extern void irq_rm_handler(uint8_t);
+/* Called by drivers */
+extern void int_handler(struct reg *);
+extern void int_add_handler(uint8_t, void (*)(struct reg *));
 
-/* The first 32 ISRs are reserved for exceptions. */
-extern void isr0(void);
-extern void isr1(void);
-extern void isr2(void);
-extern void isr3(void);
-extern void isr4(void);
-extern void isr5(void);
-extern void isr6(void);
-extern void isr7(void);
-extern void isr8(void);
-extern void isr9(void);
-extern void isr10(void);
-extern void isr11(void);
-extern void isr12(void);
-extern void isr13(void);
-extern void isr14(void);
-extern void isr15(void);
-extern void isr16(void);
-extern void isr17(void);
-extern void isr18(void);
-extern void isr19(void);
-extern void isr20(void);
-extern void isr21(void);
-extern void isr22(void);
-extern void isr23(void);
-extern void isr24(void);
-extern void isr25(void);
-extern void isr26(void);
-extern void isr27(void);
-extern void isr28(void);
-extern void isr29(void);
-extern void isr30(void);
-extern void isr31(void);
+/* The first 32 interrupts are reserved for exceptions. */
+extern void ex0(void);
+extern void ex1(void);
+extern void ex2(void);
+extern void ex3(void);
+extern void ex4(void);
+extern void ex5(void);
+extern void ex6(void);
+extern void ex7(void);
+extern void ex8(void);
+extern void ex9(void);
+extern void ex10(void);
+extern void ex11(void);
+extern void ex12(void);
+extern void ex13(void);
+extern void ex14(void);
+extern void ex15(void);
+extern void ex16(void);
+extern void ex17(void);
+extern void ex18(void);
+extern void ex19(void);
+extern void ex20(void);
+extern void ex21(void);
+extern void ex22(void);
+extern void ex23(void);
+extern void ex24(void);
+extern void ex25(void);
+extern void ex26(void);
+extern void ex27(void);
+extern void ex28(void);
+extern void ex29(void);
+extern void ex30(void);
+extern void ex31(void);
 
 /* IRQs */
 extern void irq0(void);
@@ -106,4 +96,4 @@ extern void irq13(void);
 extern void irq14(void);
 extern void irq15(void);
 
-#endif /* _KERNEL_IDT_H */
+#endif /* _KERNEL_IDT_H_ */

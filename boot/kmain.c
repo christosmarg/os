@@ -4,14 +4,13 @@
 #include "timer.h"
 
 void
-kernel_main(void) 
+kmain(void) 
 {
-	tty_init();
+	tty_clear();
 	idt_init();
 	timer_init(50);
 	kbd_init();
-	/* Enable interrupts so that the IRQs can work now. */
+	/* Enable interrupts so that the handlers can work now. */
 	__asm__ __volatile__ ("sti");
-	tty_write("Nothing to see here yet. At least it booted.\n");
 	__asm__ __volatile__ ("hlt");
 }

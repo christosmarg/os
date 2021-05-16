@@ -1,5 +1,6 @@
 #include "extern.h"
 #include "idt.h"
+#include "port.h"
 
 static void kbd_callback(struct reg *);
 
@@ -46,8 +47,7 @@ kbd_callback(struct reg *r)
 {
 	uint8_t sc;
 
-	/* TODO: backspace */
-	if ((sc = inb(0x60)) & 0x80) {
+	if ((sc = inb(P_KBD)) & 0x80) {
 	} else {
 		tty_putc(kbdus[sc]);
 	}
@@ -61,5 +61,5 @@ kbd_callback(struct reg *r)
 void
 kbd_init(void)
 {
-	irq_add_handler(1, kbd_callback);
+	int_add_handler(1, kbd_callback);
 }

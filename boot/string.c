@@ -1,5 +1,32 @@
 #include "string.h"
 
+void *
+memset(void *dst, int v, size_t len)
+{
+	unsigned char *dst0;
+	
+	dst0 = dst;
+	while (len--)
+		*dst0++ = v;
+
+	return dst;
+}
+
+void *
+memcpy(void *dst, const void *src, size_t len)
+{
+	const unsigned char *src0;
+	unsigned char *dst0;
+
+	src0 = src;
+	dst0 = dst;
+
+	while (len--)
+		*dst0++ = *src0++;
+
+	return dst;
+}
+
 size_t
 strlen(const char *str)
 {

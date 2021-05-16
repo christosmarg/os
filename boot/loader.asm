@@ -1,6 +1,6 @@
 [bits 32]
-[extern kernel_main]
+[extern kmain]
 
 _start:
-	call	kernel_main
+	call	kmain
 	jmp	$

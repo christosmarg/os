@@ -1,10 +1,11 @@
-#ifndef _KERNEL_STRING_H
-#define _KERNEL_STRING_H
+#ifndef _KERNEL_STRING_H_
+#define _KERNEL_STRING_H_
 
 #include <stddef.h>
-#include <stdint.h>
 
+extern void *memset(void *, int, size_t);
+extern void *memcpy(void *, const void *, size_t);
 extern size_t strlen(const char *);
 extern int strcmp(const char *, const char *);
 
-#endif /* _KERNEL_STRING_H */
+#endif /* _KERNEL_STRING_H_ */
