@@ -4,15 +4,14 @@ BINDIR = ../build
 CC = cc
 ASM = nasm
 LD = ld
-CFLAGS = -g -m32 -ffreestanding -Wall -Wextra -std=c99 -O2
+CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2
 LDFLAGS = -Ttext 0x1000 --oformat binary
 
 BOOTFILE = boot.asm
 BOOT_BIN = boot.bin
 KERNEL_BIN = kernel.bin
 SRC = *.c *.asm
-OBJ = loader.o \
-      kmain.o \
+OBJ = kmain.o \
       string.o \
       tty.o \
       idt.o \
@@ -49,4 +48,4 @@ install: all
 clean:
 	rm -rf *.bin *.o
 
-.PHONY: options all install clean
+.PHONY: all options install clean

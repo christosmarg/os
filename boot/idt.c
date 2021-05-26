@@ -2,14 +2,14 @@
 #include "idt.h"
 #include "port.h"
 
-#define N_INT 256 /* There are 256 interrupts in total. */
-#define KERN_CODESEG 0x08 /* Kernel code segment. */
+#define N_INT 256
+#define KERN_CODESEG 0x08
 
 static void idt_set_gate(uint8_t, uint32_t);
 
 static struct idt_gate idt[N_INT];
 static void *isr[16] = {NULL};
-/* Exception messages for the first 32 ISRs. */
+/* Exception messages for the first 32 interrupts. */
 static const char *except[] = {
 	"Division By Zero Exception",
 	"Debug Exception",
@@ -60,8 +60,8 @@ void
 idt_init(void)
 {
 	struct idt_reg {
-		uint16_t limit;	/* Points at IDT[0]. */
-		uint32_t base;	/* Points at the end of the IDT. */
+		uint16_t limit;	/* IDT size in bytes. */
+		uint32_t base;	/* Points at `idt[0]`. */
 	} __attribute__((packed)) idtr;
 
 	(void)memset(&idt, 0, sizeof(idt));
@@ -134,7 +134,6 @@ idt_init(void)
 	/* https://wiki.osdev.org/Interrupt_Descriptor_Table#Location_and_Size */
 	idtr.base = (uint32_t)&idt;
 	idtr.limit = N_INT * sizeof(struct idt_gate) - 1;
-	/* Load the IDT */
 	__asm__ __volatile__ ("lidtl (%0)" : : "r" (&idtr));
 }
 
@@ -147,7 +146,7 @@ int_handler(struct reg *r)
 	 * We'll call the handler only if the interrupt number is > 32,
 	 * which means that we're dealing with an IRQ and not an exception.
 	 */
-	if (r->intno >= 32 && (handler = isr[r->intno - 32]) != 0)
+	if (r->intno >= 32 && (handler = isr[r->intno - 32]) != NULL)
 		handler(r);
 	/* Entries below index 32 in the IDT are exceptions, we need to hang. */
 	else if (r->intno < 32) {

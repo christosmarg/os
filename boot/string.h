@@ -3,9 +3,9 @@
 
 #include <stddef.h>
 
-extern void *memset(void *, int, size_t);
-extern void *memcpy(void *, const void *, size_t);
-extern size_t strlen(const char *);
-extern int strcmp(const char *, const char *);
+void *memset(void *, int, size_t);
+void *memcpy(void *, const void *, size_t);
+size_t strlen(const char *);
+int strcmp(const char *, const char *);
 
 #endif /* _KERNEL_STRING_H_ */

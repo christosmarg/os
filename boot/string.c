@@ -8,7 +8,6 @@ memset(void *dst, int v, size_t len)
 	dst0 = dst;
 	while (len--)
 		*dst0++ = v;
-
 	return dst;
 }
 
@@ -23,7 +22,6 @@ memcpy(void *dst, const void *src, size_t len)
 
 	while (len--)
 		*dst0++ = *src0++;
-
 	return dst;
 }
 

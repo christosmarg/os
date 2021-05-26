@@ -36,12 +36,12 @@ enum vga_color {
 	VGA_WHITE,
 };
 
-extern void tty_clear(void);
-extern void tty_putc(char);
-extern void tty_write(const char *);
-extern void tty_curs_enable(uint8_t, uint8_t);
-extern void tty_curs_disable(void);
-extern void tty_curs_setpos(int, int);
-extern uint16_t tty_curs_getpos(void);
+void tty_clear(void);
+void tty_putc(char);
+void tty_write(const char *);
+void tty_curs_enable(uint8_t, uint8_t);
+void tty_curs_disable(void);
+void tty_curs_setpos(int, int);
+uint16_t tty_curs_getpos(void);
 
 #endif /* _KERNEL_TTY_H_ */

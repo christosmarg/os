@@ -54,10 +54,6 @@ kbd_callback(struct reg *r)
 	(void)r;
 }
 
-/* 
- * Send `kbd_callback` to the `irq_routines` array to be called
- * for IRQ 1.
- */
 void
 kbd_init(void)
 {

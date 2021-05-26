@@ -10,7 +10,7 @@ kmain(void)
 	idt_init();
 	timer_init(50);
 	kbd_init();
-	/* Enable interrupts so that the handlers can work now. */
 	__asm__ __volatile__ ("sti");
-	__asm__ __volatile__ ("hlt");
+
+	for (;;);
 }

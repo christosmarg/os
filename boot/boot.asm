@@ -34,7 +34,7 @@ _start:
 a20_test:
 	pusha
 	
-	mov	ax, [0x7dfe]	; 0x7c00 + 510. The magic number is there.
+	mov	ax, [0x7c00 + 510] ; The magic number is there.
 	mov	dx, ax
 
 ; We'll try to advance 1MB in memory. If the end result hasn't wrapped up
@@ -243,7 +243,7 @@ gdt_ptr:
 GDT_CODESEG	equ gdt_kernel_code - gdt
 GDT_DATASEG	equ gdt_kernel_data - gdt
 
-; Go into Protected Mode and set PAE Paging and the GDT.
+; Set up the GDT and go into Protected Mode.
 pm_enter:
 	cli			; Disable BIOS interrupts.
 	lgdt	[gdt_ptr]	; Load the GDT.
