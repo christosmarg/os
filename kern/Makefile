@@ -4,15 +4,16 @@ BINDIR = ../build
 CC = cc
 ASM = nasm
 LD = ld
-CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2
+INCDIR = ../include
+CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2 -I${INCDIR}
 LDFLAGS = -Ttext 0x1000 --oformat binary
 
 BOOTFILE = boot.asm
 BOOT_BIN = boot.bin
 KERNEL_BIN = kernel.bin
 SRC = *.c *.asm
-OBJ = kmain.o \
-      string.o \
+OBJ = kern_main.o \
+      libk.o \
       tty.o \
       idt.o \
       int.o \

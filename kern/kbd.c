@@ -1,6 +1,8 @@
-#include "extern.h"
-#include "idt.h"
-#include "port.h"
+#include <sys/libk.h>
+#include <sys/idt.h>
+#include <sys/port.h>
+
+#include <dev/kbd.h>
 
 static void kbd_callback(struct reg *);
 
@@ -51,7 +53,8 @@ kbd_callback(struct reg *r)
 	} else {
 		tty_putc(kbdus[sc]);
 	}
-	(void)r;
+
+	UNUSED(r);
 }
 
 void

@@ -1,6 +1,6 @@
-#include "extern.h"
-#include "idt.h"
-#include "port.h"
+#include <sys/libk.h>
+#include <sys/idt.h>
+#include <sys/port.h>
 
 #define N_INT 256
 #define KERN_CODESEG 0x08
@@ -9,7 +9,6 @@ static void idt_set_gate(uint8_t, uint32_t);
 
 static struct idt_gate idt[N_INT];
 static void *isr[16] = {NULL};
-/* Exception messages for the first 32 interrupts. */
 static const char *except[] = {
 	"Division By Zero Exception",
 	"Debug Exception",
@@ -149,11 +148,8 @@ int_handler(struct reg *r)
 	if (r->intno >= 32 && (handler = isr[r->intno - 32]) != NULL)
 		handler(r);
 	/* Entries below index 32 in the IDT are exceptions, we need to hang. */
-	else if (r->intno < 32) {
-		tty_write(except[r->intno]);
-		tty_write(". System halted...\n");
-		__asm__ __volatile__ ("hlt");
-	}
+	else if (r->intno < 32)
+		panic("%s: System halted...\n", except[r->intno]);
 	if (r->intno >= 40)
 		outb(P_PIC2_CMD, 0x20);
 	outb(P_PIC1_CMD, 0x20);

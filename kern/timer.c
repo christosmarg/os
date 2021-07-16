@@ -1,6 +1,6 @@
-#include "extern.h"
-#include "idt.h"
-#include "port.h"
+#include <sys/libk.h>
+#include <sys/idt.h>
+#include <sys/port.h>
 
 static void timer_callback(struct reg *);
 
@@ -10,7 +10,8 @@ static void
 timer_callback(struct reg *r)
 {
 	timer_ticks++;
-	(void)r;
+
+	UNUSED(r);
 }
 
 void

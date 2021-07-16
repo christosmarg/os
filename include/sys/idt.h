@@ -37,7 +37,7 @@ struct reg {
 	uint32_t ss;
 };
 
-/* Called by `kmain`. */
+/* Called by `kern_main`. */
 void idt_init(void);
 
 /* Called by drivers. */

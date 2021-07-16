@@ -3,21 +3,7 @@
 
 #include <stddef.h>
 
-#define _VGA_MEM 0xb8000;
-#define _VGA_COLS 80
-#define _VGA_ROWS 25
-#define _PUTC(c) (((uint16_t)tty.color << 8) | (c))
-
-#define VGA_SET_COLOR(fg, bg) ((fg) | (bg) << 4)
-
-struct tty_info {
-	volatile uint16_t *buf;
-	size_t row;
-	size_t col;
-	uint8_t color;
-};
-
-enum vga_color {
+enum vga_color: uint8_t {
 	VGA_BLACK = 0,
 	VGA_BLUE,
 	VGA_GREEN,
@@ -36,7 +22,8 @@ enum vga_color {
 	VGA_WHITE,
 };
 
-void tty_clear(void);
+void tty_clear(uint8_t, uint8_t);
+void tty_set_color(uint8_t, uint8_t);
 void tty_putc(char);
 void tty_write(const char *);
 void tty_curs_enable(uint8_t, uint8_t);

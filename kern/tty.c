@@ -1,11 +1,24 @@
-#include "io.h"
-#include "port.h"
-#include "tty.h"
+#include <sys/libk.h>
+#include <sys/io.h>
+#include <sys/port.h>
+#include <sys/tty.h>
+
+#define VGA_MEM 0xb8000;
+#define VGA_COLS 80
+#define VGA_ROWS 25
+#define TTY_PUTC(c) (((uint16_t)tty.color << 8) | (c))
+
+struct tty_info {
+	volatile uint16_t *buf;
+	size_t row;
+	size_t col;
+	uint8_t color;
+};
 
 static struct tty_info tty;
 
 void
-tty_clear(void)
+tty_clear(uint8_t fg, uint8_t bg)
 {
 	size_t y, x;
 
@@ -13,11 +26,17 @@ tty_clear(void)
 	tty_curs_setpos(0, 0);
 	tty.row = 0;
 	tty.col = 0;
-	tty.color = VGA_SET_COLOR(VGA_BLUE, VGA_WHITE);
-	tty.buf = (uint16_t *)_VGA_MEM;
-	for (x = 0; x < _VGA_COLS; x++)
-		for (y = 0; y < _VGA_ROWS; y++)
-			tty.buf[y * _VGA_COLS + x] = _PUTC(' ');
+	tty.buf = (uint16_t *)VGA_MEM;
+	tty_set_color(fg, bg);
+	for (x = 0; x < VGA_COLS; x++)
+		for (y = 0; y < VGA_ROWS; y++)
+			tty.buf[y * VGA_COLS + x] = TTY_PUTC(' ');
+}
+
+void
+tty_set_color(uint8_t fg, uint8_t bg)
+{
+	tty.color = fg | (bg << 4);
 }
 
 void
@@ -30,7 +49,7 @@ tty_putc(char c)
 		break;
 	case '\b':
 		tty.col--;
-		tty.buf[tty.row * _VGA_COLS + tty.col] = _PUTC(' ');
+		tty.buf[tty.row * VGA_COLS + tty.col] = TTY_PUTC(' ');
 		break;
 	case '\r':
 		tty.col = 0;
@@ -39,15 +58,15 @@ tty_putc(char c)
 		tty.col += 8;
 		break;
 	default:
-		tty.buf[tty.row * _VGA_COLS + tty.col] = _PUTC(c);
+		tty.buf[tty.row * VGA_COLS + tty.col] = TTY_PUTC(c);
 		tty.col++;
 	}
 
-	if (tty.row >= _VGA_ROWS) {
+	if (tty.row >= VGA_ROWS) {
 		tty.row = 0;
 		tty.col = 0;
 	}
-	if (tty.col >= _VGA_COLS) {
+	if (tty.col >= VGA_COLS) {
 		tty.row++;
 		tty.col = 0;
 	}
@@ -89,9 +108,9 @@ tty_curs_disable(void)
 }
 
 /* 
- * Returns the position in `y * _VGA_COLS + x` format.
- * x = pos % _VGA_COLS
- * y = pos / _VGA_COLS
+ * Returns the position in `y * VGA_COLS + x` format.
+ * x = pos % VGA_COLS
+ * y = pos / VGA_COLS
  */
 uint16_t
 tty_curs_getpos(void)
@@ -103,13 +122,13 @@ tty_curs_getpos(void)
 	outb(P_CURS_CMD, 0x0f);
 	pos |= inb(P_CURS_DATA);
 
-	return pos;
+	return (pos);
 }
 
 void
 tty_curs_setpos(int x, int y)
 {
-	uint16_t pos = y * _VGA_COLS + x;
+	uint16_t pos = y * VGA_COLS + x;
 
 	/* Expect 8 highest bits */
 	outb(P_CURS_CMD, 0x0e);
