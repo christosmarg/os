@@ -20,6 +20,7 @@ size_t strlen(const char *);
 int strcmp(const char *, const char *);
 int vsprintf(char *, const char *, va_list);
 int sprintf(char *, const char *, ...);
+/* TODO: kprintf */
 int printf(const char *, ...);
 void panic(const char *, ...);
 

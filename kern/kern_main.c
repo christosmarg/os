@@ -1,29 +1,22 @@
 #include <sys/libk.h>
-#include <sys/idt.h>
-#include <sys/io.h>
-#include <sys/timer.h>
 
 #include <dev/kbd.h>
 
-#define OK() ((void)printf("ok\n"))
+#include "idt.h"
+#include "timer.h"
 
-void
+int
 kern_main(void) 
 {
 	tty_clear(VGA_BLUE, VGA_WHITE);
-
-	printf("IDT... ");
 	idt_init();
-	OK();
-
-	printf("Timer... ");
-	timer_init(50);
-	OK();
-
-	printf("Keyboard... ");
+	timer_init();
 	kbd_init();
-	OK();
-
 	sti();
+
+	/* Off to userland! */
 	for (;;);
+
+	/* NOTREACHED */
+	return (0);
 }

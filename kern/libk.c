@@ -1,6 +1,6 @@
 #include <sys/libk.h>
-#include <sys/io.h>
 
+/* TODO: implement */
 static char *
 itoa(int n, char *buf, int base)
 {

@@ -1,7 +1,4 @@
 #include <sys/libk.h>
-#include <sys/io.h>
-#include <sys/port.h>
-#include <sys/tty.h>
 
 #define VGA_MEM 0xb8000;
 #define VGA_COLS 80
@@ -89,22 +86,22 @@ void
 tty_curs_enable(uint8_t start, uint8_t end)
 {
 	/* 0x0a: Low cursor shape */
-	outb(P_CURS_CMD, 0x0a);
-	outb(P_CURS_DATA, (inb(P_CURS_DATA) & 0xc0) | start);
-	outb(P_CURS_CMD, 0x0b);
-	outb(P_CURS_DATA, (inb(P_CURS_DATA) & 0xe0) | end);
+	outb(IO_CURS_CMD, 0x0a);
+	outb(IO_CURS_DATA, (inb(IO_CURS_DATA) & 0xc0) | start);
+	outb(IO_CURS_CMD, 0x0b);
+	outb(IO_CURS_DATA, (inb(IO_CURS_DATA) & 0xe0) | end);
 }
 
 void
 tty_curs_disable(void)
 {
-	outb(P_CURS_CMD, 0x0a);
+	outb(IO_CURS_CMD, 0x0a);
 	/* 
 	 * Bit representation:
 	 * 7    6 | 5	    | 4   0
 	 * Unused | Disable | Shape
 	 */
-	outb(P_CURS_DATA, 0x20);
+	outb(IO_CURS_DATA, 0x20);
 }
 
 /* 
@@ -117,10 +114,10 @@ tty_curs_getpos(void)
 {
 	uint16_t pos = 0;
 
-	outb(P_CURS_CMD, 0x0e);
-	pos |= (uint16_t)inb(P_CURS_DATA) << 8;
-	outb(P_CURS_CMD, 0x0f);
-	pos |= inb(P_CURS_DATA);
+	outb(IO_CURS_CMD, 0x0e);
+	pos |= (uint16_t)inb(IO_CURS_DATA) << 8;
+	outb(IO_CURS_CMD, 0x0f);
+	pos |= inb(IO_CURS_DATA);
 
 	return (pos);
 }
@@ -131,9 +128,9 @@ tty_curs_setpos(int x, int y)
 	uint16_t pos = y * VGA_COLS + x;
 
 	/* Expect 8 highest bits */
-	outb(P_CURS_CMD, 0x0e);
-	outb(P_CURS_DATA, (uint8_t)((pos >> 8) & 0xff));
+	outb(IO_CURS_CMD, 0x0e);
+	outb(IO_CURS_DATA, (uint8_t)((pos >> 8) & 0xff));
 	/* Expect 8 lowest bits */
-	outb(P_CURS_CMD, 0x0f);
-	outb(P_CURS_DATA, (uint8_t)(pos & 0xff));
+	outb(IO_CURS_CMD, 0x0f);
+	outb(IO_CURS_DATA, (uint8_t)(pos & 0xff));
 }

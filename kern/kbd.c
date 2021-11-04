@@ -1,12 +1,50 @@
 #include <sys/libk.h>
-#include <sys/idt.h>
-#include <sys/port.h>
 
 #include <dev/kbd.h>
 
+#include "idt.h"
+
 static void kbd_callback(struct reg *);
 
-static unsigned char kbdus[128] = {
+static unsigned char kbdus_upper[128] = {
+	0,	/* Error */
+	27,	/* Escape */
+	'!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+	'_', '+', '\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+	'{', '}', '\n',
+	0,	/* Control */
+       	'A', 'S', 'D', 'F', 'G',
+	'H', 'J', 'K', 'L', ':', '"', '~', 
+	0,	/* Left Shift */
+	'|', 'Z', 'X',
+	'C', 'V', 'B', 'N', 'M', '<', '>', '?', 
+	0,	/* Right Shift */
+	'*', 
+	0,	/* Alt */
+	' ',
+	0,	/* Caps Lock */
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* F1-F10 */
+	0,	/* Num Lock */
+	0,	/* Scroll Lock */
+	0,	/* Home Key */
+	0,	/* Up Arrow */
+	0,	/* Page Up */
+	'-',
+	0,	/* Left Arrow */
+	0,
+	0,	/* Right Arrow */
+	'+',
+	0,	/* End Key */
+	0,	/* Down Arrow */
+	0,	/* Page Down */
+	0,	/* Insert Key */
+	0,	/* Delete Key */
+	0, 0, 0,
+	0, 0,	/* F11, F12 */
+	0,	/* The rest are undefined */
+};
+
+static unsigned char kbdus_lower[128] = {
 	0,	/* Error */
 	27,	/* Escape */
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -48,12 +86,13 @@ static void
 kbd_callback(struct reg *r)
 {
 	uint8_t sc;
+	int shift = 0;
 
-	if ((sc = inb(P_KBD)) & 0x80) {
+	if ((sc = inb(IO_KBD)) & KBD_PRESSED) {
 	} else {
-		tty_putc(kbdus[sc]);
+		/* TODO: shift */
+		tty_putc(shift ? kbdus_upper[sc] : kbdus_lower[sc]);
 	}
-
 	UNUSED(r);
 }
 
@@ -61,4 +100,5 @@ void
 kbd_init(void)
 {
 	int_add_handler(1, kbd_callback);
+	printf("kbd on int 1\n");
 }

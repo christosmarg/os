@@ -2,7 +2,8 @@
 [org 0x7c00]
 [bits 16]
 
-KERNOFF	equ 0x1000
+MAGICOFF	equ (0x7c00 + 510)
+KERNOFF		equ 0x1000
 
 section .text
 	global _start
@@ -34,7 +35,7 @@ _start:
 a20_test:
 	pusha
 	
-	mov	ax, [0x7c00 + 510] ; The magic number is there.
+	mov	ax, [MAGICOFF] ; The magic number is there.
 	mov	dx, ax
 
 ; We'll try to advance 1MB in memory. If the end result hasn't wrapped up
@@ -97,7 +98,7 @@ exit:
 a20_enable:
 	pusha
 
-; BIOS interrupt.
+	; BIOS interrupt.
 	mov	ax, 0x2401	; A20-Gate Active.
 	int	0x15
 
@@ -106,7 +107,7 @@ a20_enable:
 	je	a20_done
 	jmp	a20_fail
 
-; Keyboard controller.
+	; Keyboard controller.
 	sti			; Enable interrupts.
 
 	call	a20_waitc
@@ -268,7 +269,7 @@ pm_init:
 	call	kernel_exec
 	jmp	$
 
-; Hand control over to the C kernel. Godspeed.
+; Hand control over to the C kernel. Godspeed! You Black Emperor.
 kernel_exec:
 	call	KERNOFF
 	jmp	$
@@ -292,6 +293,7 @@ putchar:
 ; String declarations.
 str_diskerr:	db "Error loading disk.", 0x0a, 0x0d, 0x00
 str_a20_fail:	db "The A20 Line is disabled", 0x0a, 0x0d, 0x00
+
 BOOTDRV:	db 0x80
 
 ; Padding to 512 bytes. The last 2 bytes will come from the magic number.

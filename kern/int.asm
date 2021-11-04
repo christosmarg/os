@@ -53,14 +53,14 @@ global irq13
 global irq14
 global irq15
 
-%macro intdef_noerr 1
+%macro int_noerr 1
 	cli
 	push	byte 0
 	push	byte %1
 	jmp	int_common_stub
 %endmacro
 
-%macro intdef_err 1
+%macro int_err 1
 	cli
 	push	byte 0
 	push	byte %1
@@ -68,55 +68,55 @@ global irq15
 %endmacro
 
 ; Exceptions
-ex0:	intdef_noerr	0  ; Division By Zero
-ex1:	intdef_noerr	1  ; Debug
-ex2:	intdef_noerr	2  ; Non Maskable Interrupt
-ex3:	intdef_noerr	3  ; Breakpoint
-ex4:	intdef_noerr	4  ; Into Detected Overflow
-ex5:	intdef_noerr	5  ; Out of Bounds
-ex6:	intdef_noerr	6  ; Invalid Opcode
-ex7:	intdef_noerr	7  ; No Coprocessor
-ex8:	intdef_err	8  ; Double Fault (with error code)
-ex9:	intdef_noerr	9  ; Coprocessor Segment Overrrun
-ex10:	intdef_err	10 ; Bad TSS (with error code)
-ex11:	intdef_err	11 ; Segment Not Present (with error code)
-ex12:	intdef_err	12 ; Stack Fault (with error code)
-ex13:	intdef_err	13 ; General Protection Fault (with error code)
-ex14:	intdef_err	14 ; Page Fault (with error code)
-ex15:	intdef_noerr	15 ; Unkown Interrupt
-ex16:	intdef_noerr	16 ; Coprocessor Fault
-ex17:	intdef_noerr	17 ; Alignment Check (486+)
-ex18:	intdef_noerr	18 ; Machine Check (Pentium/586+)
-ex19:	intdef_noerr	19 ; Reserved
-ex20:	intdef_noerr	20 ; Reserved
-ex21:	intdef_noerr	21 ; Reserved
-ex22:	intdef_noerr	22 ; Reserved
-ex23:	intdef_noerr	23 ; Reserved
-ex24:	intdef_noerr	24 ; Reserved
-ex25:	intdef_noerr	25 ; Reserved
-ex26:	intdef_noerr	26 ; Reserved
-ex27:	intdef_noerr	27 ; Reserved
-ex28:	intdef_noerr	28 ; Reserved
-ex29:	intdef_noerr	29 ; Reserved
-ex30:	intdef_noerr	30 ; Reserved
-ex31:	intdef_noerr	31 ; Reserved
+ex0:	int_noerr	0  ; Division By Zero
+ex1:	int_noerr	1  ; Debug
+ex2:	int_noerr	2  ; Non Maskable Interrupt
+ex3:	int_noerr	3  ; Breakpoint
+ex4:	int_noerr	4  ; Into Detected Overflow
+ex5:	int_noerr	5  ; Out of Bounds
+ex6:	int_noerr	6  ; Invalid Opcode
+ex7:	int_noerr	7  ; No Coprocessor
+ex8:	int_err		8  ; Double Fault (with error code)
+ex9:	int_noerr	9  ; Coprocessor Segment Overrrun
+ex10:	int_err		10 ; Bad TSS (with error code)
+ex11:	int_err		11 ; Segment Not Present (with error code)
+ex12:	int_err		12 ; Stack Fault (with error code)
+ex13:	int_err		13 ; General Protection Fault (with error code)
+ex14:	int_err		14 ; Page Fault (with error code)
+ex15:	int_noerr	15 ; Unkown Interrupt
+ex16:	int_noerr	16 ; Coprocessor Fault
+ex17:	int_noerr	17 ; Alignment Check (486+)
+ex18:	int_noerr	18 ; Machine Check (Pentium/586+)
+ex19:	int_noerr	19 ; Reserved
+ex20:	int_noerr	20 ; Reserved
+ex21:	int_noerr	21 ; Reserved
+ex22:	int_noerr	22 ; Reserved
+ex23:	int_noerr	23 ; Reserved
+ex24:	int_noerr	24 ; Reserved
+ex25:	int_noerr	25 ; Reserved
+ex26:	int_noerr	26 ; Reserved
+ex27:	int_noerr	27 ; Reserved
+ex28:	int_noerr	28 ; Reserved
+ex29:	int_noerr	29 ; Reserved
+ex30:	int_noerr	30 ; Reserved
+ex31:	int_noerr	31 ; Reserved
 ; IRQs
-irq0:	intdef_noerr	32 ; Programmable Interrupt Timer
-irq1:	intdef_noerr	33 ; Keyboard
-irq2:	intdef_noerr	34 ; Cascade (used internally by the two PICs, never raised)
-irq3:	intdef_noerr	35 ; COM2 (if enabled)
-irq4:	intdef_noerr	36 ; COM1 (if enabled)
-irq5:	intdef_noerr	37 ; LPT2 (if enabled)
-irq6:	intdef_noerr	38 ; Floppy Disk
-irq7:	intdef_noerr	39 ; LPT1
-irq8:	intdef_noerr	40 ; CMOS real-time clock (if enabled)
-irq9:	intdef_noerr	41 ; Peripherals / Legacy SCSI / NIC
-irq10:	intdef_noerr	42 ; Peripherals / SCSI / NIC
-irq11:	intdef_noerr	43 ; Peripherals / SCSI / NIC
-irq12:	intdef_noerr	44 ; PS2 Mouse
-irq13:	intdef_noerr	45 ; FPU / Coprocessor / Inter-processor
-irq14:	intdef_noerr	46 ; Primary ATA Hard Disk
-irq15:	intdef_noerr	47 ; Secondary ATA Hard Disk
+irq0:	int_noerr	32 ; Programmable Interrupt Timer
+irq1:	int_noerr	33 ; Keyboard
+irq2:	int_noerr	34 ; Cascade (used internally by the two PICs, never raised)
+irq3:	int_noerr	35 ; COM2 (if enabled)
+irq4:	int_noerr	36 ; COM1 (if enabled)
+irq5:	int_noerr	37 ; LPT2 (if enabled)
+irq6:	int_noerr	38 ; Floppy Disk
+irq7:	int_noerr	39 ; LPT1
+irq8:	int_noerr	40 ; CMOS real-time clock (if enabled)
+irq9:	int_noerr	41 ; Peripherals / Legacy SCSI / NIC
+irq10:	int_noerr	42 ; Peripherals / SCSI / NIC
+irq11:	int_noerr	43 ; Peripherals / SCSI / NIC
+irq12:	int_noerr	44 ; PS2 Mouse
+irq13:	int_noerr	45 ; FPU / Coprocessor / Inter-processor
+irq14:	int_noerr	46 ; Primary ATA Hard Disk
+irq15:	int_noerr	47 ; Secondary ATA Hard Disk
 
 ; Save the processor state, call the C interrupt handler and restore the
 ; stack frame.

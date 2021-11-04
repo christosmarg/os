@@ -1,14 +1,7 @@
 #ifndef _KERNEL_IDT_H_
 #define _KERNEL_IDT_H_
 
-/* IA-32 */
-struct idt_gate {
-	uint16_t off_lo;
-	uint16_t sel;
-	uint8_t zero;
-	uint8_t flags;
-	uint16_t off_hi;
-} __attribute__((packed));
+/* TODO: keep counter? */
 
 /* This will be populated by `int_common_stub` in `int.asm`. */
 struct reg {

@@ -3,6 +3,16 @@
 
 #include <stdint.h>
 
+#define IO_PIC1_CMD	0x20
+#define IO_PIC2_CMD	0xa0
+#define IO_PIC1_DATA	(IO_PIC1_CMD + 1)
+#define IO_PIC2_DATA	(IO_PIC2_CMD + 1)
+#define IO_TIMER_CMD	0x43
+#define IO_TIMER_DATA	0x40
+#define IO_CURS_CMD	0x3d4
+#define IO_CURS_DATA	0x3d5
+#define IO_KBD		0x60
+
 static inline uint8_t
 inb(uint16_t port)
 {
