@@ -66,12 +66,15 @@ pic_remap(void)
 	outb(PIC_MASTER_DATA, 0x00);
 }
 
-extern void ex_div, ex_dbg, ex_nmsk, ex_bpt, ex_ofl, ex_bnd, ex_ill, ex_dna,
-    ex_dbl, ex_fpusegm, ex_tss, ex_missing, ex_stk, ex_prot, ex_page, ex_rsvd,
-    ex_fpu, ex_align, ex_mchk, ex_simd;
+extern void INTVEC(div), INTVEC(dbg), INTVEC(nmsk), INTVEC(bpt), INTVEC(ofl),
+    INTVEC(bnd), INTVEC(ill), INTVEC(dna), INTVEC(dbl), INTVEC(fpusegm),
+    INTVEC(tss), INTVEC(missing), INTVEC(stk), INTVEC(prot), INTVEC(page),
+    INTVEC(rsvd), INTVEC(fpu), INTVEC(align), INTVEC(mchk), INTVEC(simd);
 
-extern void irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7, irq8, irq9, irq10,
-    irq11, irq12, irq13, irq14, irq15;
+extern void INTVEC(irq0), INTVEC(irq1), INTVEC(irq2), INTVEC(irq3),
+    INTVEC(irq4), INTVEC(irq5), INTVEC(irq6), INTVEC(irq7), INTVEC(irq8),
+    INTVEC(irq9), INTVEC(irq10), INTVEC(irq11), INTVEC(irq12), INTVEC(irq13),
+    INTVEC(irq14), INTVEC(irq15);
 
 void
 idt_init(void)
@@ -80,49 +83,85 @@ idt_init(void)
 	int i;
 
 	for (i = 0; i < NINT; i++)
-		idt_set_gate(&idt[i], &ex_rsvd, SEL_KCODE,
+		idt_set_gate(&idt[i], &INTVEC(rsvd), SEL_KCODE,
 		    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 0], &ex_div, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 1], &ex_dbg,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 2], &ex_nmsk, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 3], &ex_bpt,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 4], &ex_ofl,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 5], &ex_bnd,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 6], &ex_ill,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 7], &ex_dna,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 8], &ex_dbl,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 9], &ex_fpusegm, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[10], &ex_tss,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[11], &ex_missing, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[12], &ex_stk,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[13], &ex_prot, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[14], &ex_page, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[15], &ex_rsvd, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[16], &ex_fpu,	SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[17], &ex_align, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[18], &ex_mchk, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[19], &ex_simd, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 0], &INTVEC(div), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 1], &INTVEC(dbg), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 2], &INTVEC(nmsk), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 3], &INTVEC(bpt), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 4], &INTVEC(ofl), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 5], &INTVEC(bnd), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 6], &INTVEC(ill), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 7], &INTVEC(dna), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 8], &INTVEC(dbl), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[ 9], &INTVEC(fpusegm), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[10], &INTVEC(tss), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[11], &INTVEC(missing), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[12], &INTVEC(stk), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[13], &INTVEC(prot), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[14], &INTVEC(page), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[15], &INTVEC(rsvd), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[16], &INTVEC(fpu), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[17], &INTVEC(align), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[18], &INTVEC(mchk), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[19], &INTVEC(simd), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
 	/* 20 - 31 are reserved. */
 
 	pic_remap();
 
 	/* FIXME: how is this related to irq 0 -> timer etc? */
-	idt_set_gate(&idt[32], &irq0, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[33], &irq1, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[34], &irq2, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[35], &irq3, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[36], &irq4, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[37], &irq5, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[38], &irq6, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[39], &irq7, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[40], &irq8, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[41], &irq9, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[42], &irq10, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[43], &irq11, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[44], &irq12, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[45], &irq13, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[46], &irq14, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[47], &irq15, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[32], &INTVEC(irq0), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[33], &INTVEC(irq1), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[34], &INTVEC(irq2), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[35], &INTVEC(irq3), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[36], &INTVEC(irq4), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[37], &INTVEC(irq5), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[38], &INTVEC(irq6), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[39], &INTVEC(irq7), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[40], &INTVEC(irq8), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[41], &INTVEC(irq9), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[42], &INTVEC(irq10), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[43], &INTVEC(irq11), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[44], &INTVEC(irq12), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[45], &INTVEC(irq13), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[46], &INTVEC(irq14), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[47], &INTVEC(irq15), SEL_KCODE,
+	    GT_FLAGS(PL_KERN, TP_386IGT));
 
 	/*idt_set_gate(&idt[127], &syscall, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));*/
 
@@ -136,7 +175,7 @@ static const char *exceptmsg[] = {
 	"Debug Exception",
 	"Non Maskable Interrupt Exception",
 	"Breakpoint Exception",
-	"Into Detected Overflow Exception",
+	"Detected Overflow Exception",
 	"Out of Bounds Exception",
 	"Invalid Opcode Exception",
 	"No Coprocessor Exception",

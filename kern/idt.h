@@ -1,6 +1,8 @@
 #ifndef _KERNEL_IDT_H_
 #define _KERNEL_IDT_H_
 
+#define INTVEC(name)	__CONCAT(intr_, name)
+
 /* IA-32 */
 struct gate_desc {
 	uint16_t	gd_off_lo;
