@@ -1,8 +1,13 @@
-#include <sys/libk.h>
-
-#include <dev/kbd.h>
-
+#include "libk.h"
+#include "kbd.h"
 #include "idt.h"
+
+#define KBD_CMD		0x60
+#define KBD_PRESSED	0x80
+#define KBD_LSHIFT	0x2a
+#define KBD_RSHIFT	0x36
+#define KBD_LSHIFT_REL	0xaa
+#define KBD_RSHIFT_REL	0xb6
 
 static void kbd_callback(struct reg *);
 
@@ -88,10 +93,10 @@ kbd_callback(struct reg *r)
 	uint8_t sc;
 	int shift = 0;
 
-	if ((sc = inb(IO_KBD)) & KBD_PRESSED) {
+	if ((sc = inb(KBD_CMD)) & KBD_PRESSED) {
 	} else {
 		/* TODO: shift */
-		tty_putc(shift ? kbdus_upper[sc] : kbdus_lower[sc]);
+		vga_putc(shift ? kbdus_upper[sc] : kbdus_lower[sc]);
 	}
 	UNUSED(r);
 }
@@ -99,6 +104,6 @@ kbd_callback(struct reg *r)
 void
 kbd_init(void)
 {
-	int_add_handler(1, kbd_callback);
-	printf("kbd on int 1\n");
+	intr_register_handler(1, kbd_callback);
+	printf("kbd on irq %d\n", 1);
 }

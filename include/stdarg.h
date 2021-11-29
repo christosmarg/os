@@ -1,5 +1,5 @@
-#ifndef _KERNEL_STDARG_H
-#define _KERNEL_STDARG_H
+#ifndef _KERNEL_STDARG_H_
+#define _KERNEL_STDARG_H_
 
 #ifndef _VA_LIST_DECLARED
 #define _VA_LIST_DECLARED
@@ -11,4 +11,4 @@ typedef __va_list va_list;
 #define va_copy(dest, src)	__builtin_va_copy((dest), (src))
 #define va_end(ap)		__builtin_va_end(ap)
 
-#endif /* _KERNEL_STDARG_H */
+#endif /* _KERNEL_STDARG_H_ */

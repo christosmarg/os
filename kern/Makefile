@@ -8,15 +8,15 @@ INCDIR = ../include
 CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2 -I${INCDIR}
 LDFLAGS = -Ttext 0x1000 --oformat binary
 
-BOOTFILE = boot.asm
+BOOTFILE = boot.s
 BOOT_BIN = boot.bin
 KERNEL_BIN = kernel.bin
-SRC = *.c *.asm
+SRC = *.c *.s
 OBJ = kern_main.o \
       libk.o \
-      tty.o \
       idt.o \
-      int.o \
+      intr.o \
+      vga.o \
       kbd.o \
       timer.o
 
@@ -40,7 +40,7 @@ ${BIN}: ${OBJ}
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
-.asm.o:
+.s.o:
 	${ASM} -felf $<
 
 install: all

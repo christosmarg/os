@@ -1,6 +1,8 @@
-#include <sys/libk.h>
-
+#include "libk.h"
 #include "idt.h"
+
+#define TIMER_CMD	0x43
+#define TIMER_DATA	0x40
 
 static void timer_callback(struct reg *);
 
@@ -19,9 +21,9 @@ timer_init(void)
 	const uint32_t hz = 60;
 	uint32_t div = 1193180 / hz;
 
-	int_add_handler(0, timer_callback);
-	outb(IO_TIMER_CMD, 0x36);
-	outb(IO_TIMER_DATA, (uint8_t)(div & 0xff));
-	outb(IO_TIMER_DATA, (uint8_t)((div >> 8) & 0xff));
-	printf("timer on int 0\n");
+	intr_register_handler(0, timer_callback);
+	outb(TIMER_CMD, 0x36);
+	outb(TIMER_DATA, (uint8_t)(div & 0xff));
+	outb(TIMER_DATA, (uint8_t)((div >> 8) & 0xff));
+	printf("timer on irq %d\n", 0);
 }

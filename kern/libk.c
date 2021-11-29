@@ -1,13 +1,104 @@
-#include <sys/libk.h>
+#include "libk.h"
 
-/* TODO: implement */
-static char *
-itoa(int n, char *buf, int base)
+#define ZEROPAD	0x01
+#define SIGN	0x02
+#define PLUS	0x04
+#define SPACE	0x08
+#define LEFT	0x10
+#define SMALL	0x20
+#define SPECIAL 0x40
+
+static int	calc_width(const char **);
+static int	div(long *, int);
+static char	*itoa(char *, long, int, int, int, int);
+
+static int
+calc_width(const char **s)
 {
-	(void)n;
-	(void)base;
+	int i = 0;
 
-	return (buf);
+	while (isdigit(**s))
+		i = i * 10 + *((*s)++) - '0';
+	return (i);
+}
+
+static int
+div(long *n, int base)
+{
+	int res;
+
+	res = (unsigned long)*n % (unsigned int)base;
+	*n = (unsigned long)*n / (unsigned int)base;
+	return (res);
+}
+
+static char *
+itoa(char *str, long num, int base, int size, int precision, int flags)
+{
+	static const char digits[16] = "0123456789ABCDEF";
+	char tmp[66];
+	int i;
+	char c, locase, sign;
+
+	locase = (flags & SMALL);
+	if (flags & LEFT)
+		flags &= ~ZEROPAD;
+	if (base < 2 || base > 16)
+		return (NULL);
+	c = (flags & ZEROPAD) ? '0' : ' ';
+	sign = 0;
+	if (flags & SIGN) {
+		if (num < 0) {
+			sign = '-';
+			num = -num;
+			size--;
+		} else if (flags & PLUS) {
+			sign = '+';
+			size--;
+		} else if (flags & SPACE) {
+			sign = ' ';
+			size--;
+		}
+	}
+	if (flags & SPECIAL) {
+		if (base == 8)
+			size--;
+		else if (base == 16)
+			size -= 2;
+	}
+	i = 0;
+	if (!num)
+		tmp[i++] = '0';
+	else
+		while (num)
+			tmp[i++] = (digits[div(&num, base)] | locase);
+	if (i > precision)
+		precision = i;
+	size -= precision;
+	if (!(flags & (ZEROPAD | LEFT))) /* XXX: + instead of | ? */
+		while (size-- > 0)
+			*str++ = ' ';
+	if (sign)
+		*str++ = sign;
+	if (flags & SPECIAL) {
+		if (base == 8)
+			*str++ = '0';
+		else if (base == 16) {
+			*str++ = '0';
+			*str++ = ('X' | locase);
+		}
+	}
+	if (!(flags & LEFT))
+		while (size-- > 0)
+			*str++ = c;
+	while (i < precision--)
+		*str++ = '0';
+	while (i-- > 0)
+		*str++ = tmp[i];
+	while (size-- > 0)
+		*str++ = ' ';
+
+	return (str);
 }
 
 void *
@@ -48,6 +139,18 @@ strlen(const char *str)
 	return (s - str);
 }
 
+size_t
+strnlen(const char *str, size_t maxlen)
+{
+	const char *s = str;
+
+	while (*s && maxlen) {
+		s++;
+		maxlen--;
+	}
+	return (s - str);
+}
+
 int
 strcmp(const char *s1, const char *s2)
 {
@@ -59,49 +162,147 @@ strcmp(const char *s1, const char *s2)
 }
 
 int
-vsprintf(char *buf, const char *fmt, va_list args)
+isdigit(char c)
+{
+	return (c >= '0' && c <= '9');
+}
+
+int
+vsprintf(char *buf, const char *fmt, va_list ap)
 {
 	char *str, *s;
-	int base, i, n;
+	int base, i, n, flags, qual, size, precision;
 
 	for (str = buf; *fmt != '\0'; fmt++) {
-		base = 10;
 		if (*fmt != '%') {
 			*str++ = *fmt;
 			continue;
 		}
-		if (*fmt == '%') {
-			switch (*(++fmt)) {
-			case 'c':
-				*str++ = (unsigned char)va_arg(args, int);
-				continue;
-			case 's':
-				s = va_arg(args, char *);
-				n = strlen(s);
-				for (i = 0; i < n; i++)
-					*str++ = *s++;
-				continue;
-			case 'p':
-				continue;
-			case 'd': /* FALLTHROUGH */
-			case 'i':
-				n = va_arg(args, int);
-				break;
-			case 'u':
-				n = va_arg(args, unsigned int);
-				break;
-			case 'o':
-				base = 8;
-				break;
-			case 'X':
-				base = 16;
-				break;
-			case '%':
-				*str++ = '%';
-				continue;
-			}
-			str = itoa(n, str, base);
+		flags = 0;
+repeat:
+		fmt++;
+		switch (*fmt) {
+		case '-':
+			flags |= LEFT;
+			goto repeat;
+		case '+':
+			flags |= PLUS;
+			goto repeat;
+		case ' ':
+			flags |= SPACE;
+			goto repeat;
+		case '#':
+			flags |= SPECIAL;
+			goto repeat;
+		case '0':
+			flags |= ZEROPAD;
+			goto repeat;
 		}
+
+		size = -1;
+		if (isdigit(*fmt))
+			size = calc_width(&fmt);
+		else if (*fmt == '*') {
+			fmt++;
+			if ((size = va_arg(ap, int)) < 0) {
+				size -= size;
+				flags |= LEFT;
+			}
+		}
+
+		precision = -1;
+		if (*fmt == '.') {
+			fmt++;
+			if (isdigit(*fmt))
+				precision = calc_width(&fmt);
+			else if (*fmt == '*') {
+				fmt++;
+				precision = va_arg(ap, int);
+			}
+			if (precision < 0)
+				precision = 0;
+		}
+
+		qual = -1;
+		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L')
+			qual = *fmt++;
+
+		base = 10;
+		switch (*fmt) {
+		case 'c':
+			if (!(flags & LEFT))
+				while (--size > 0)
+					*str++ = ' ';
+			*str++ = (unsigned char)va_arg(ap, int);
+			while (--size > 0)
+				*str++ = ' ';
+			continue;
+		case 's':
+			s = va_arg(ap, char *);
+			n = strnlen(s, precision);
+			if (!(flags & LEFT))
+				while (n < size--)
+					*str++ = ' ';
+			for (i = 0; i < n; i++)
+				*str++ = *s++;
+			while (n < size--)
+				*str++ = ' ';
+			continue;
+		case 'p':
+			if (size == -1) {
+				size = sizeof(void *) << 1;
+				flags |= ZEROPAD;
+			}
+			str = itoa(str,
+			    (unsigned long)va_arg(ap, void *), 16,
+			    size, precision, flags);
+			continue;
+		case 'n':
+			if (qual == 'l') {
+				long *ip = va_arg(ap, long *);
+				*ip = (str - buf);
+			} else {
+				int *ip = va_arg(ap, int *);
+				*ip = (str - buf);
+			}
+			continue;
+		case '%':
+			*str++ = '%';
+			continue;
+		case 'd': /* FALLTHROUGH */
+		case 'i':
+			flags |= SIGN;
+			break;
+		case 'u':
+			break;
+		case 'o':
+			base = 8;
+			break;
+		case 'x': /* FALLTHROUGH */
+			flags |= SMALL;
+		case 'X':
+			base = 16;
+			break;
+		default:
+			*str++ = '%';
+			if (*fmt)
+				*str++ = *fmt;
+			else
+				fmt--;
+			continue;
+		}
+
+		if (qual == 'l')
+			n = va_arg(ap, unsigned long);
+		else if (qual == 'h') {
+			n = (unsigned short)va_arg(ap, int);
+			if (flags & SIGN)
+				n = (short)n;
+		} else if (flags & SIGN)
+			n = va_arg(ap, int);
+		else
+			n = va_arg(ap, unsigned int);
+		str = itoa(str, n, base, size, precision, flags);
 	}
 	*str = '\0';
 
@@ -111,12 +312,12 @@ vsprintf(char *buf, const char *fmt, va_list args)
 int
 sprintf(char *buf, const char *fmt, ...)
 {
-	va_list args;
+	va_list ap;
 	int n;
 
-	va_start(args, fmt);
-	n = vsprintf(buf, fmt, args);
-	va_end(args);
+	va_start(ap, fmt);
+	n = vsprintf(buf, fmt, ap);
+	va_end(ap);
 
 	return (n);
 }
@@ -125,26 +326,32 @@ int
 printf(const char *fmt, ...)
 {
 	char buf[BUFSIZ];
-	va_list args;
+	va_list ap;
 	int n;
 
-	va_start(args, fmt);
-	n = vsprintf(buf, fmt, args);
-	va_end(args);
-	tty_write(buf);
+	va_start(ap, fmt);
+	n = vsprintf(buf, fmt, ap);
+	va_end(ap);
+	vga_write(buf);
 
 	return (n);
 }
 
+/* TODO: print regs */
 void
 panic(const char *fmt, ...)
 {
-	va_list args;
+	char buf[BUFSIZ];
+	va_list ap;
+	int n;
 
 	cli();
-	printf("Kernel panic!\n");
-	va_start(args, fmt);
-	printf(fmt, args);
-	va_end(args);
+	vga_set_color(VGA_RED, VGA_WHITE);
+	printf("panic: ");
+	va_start(ap, fmt);
+	n = vsprintf(buf, fmt, ap);
+	va_end(ap);
+	vga_write(buf);
+	vga_set_color(VGA_BLACK, VGA_WHITE);
 	hlt();
 }

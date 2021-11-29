@@ -146,13 +146,13 @@ a20_enable:
 a20_waitc:
 	in	al, 0x64	; Read from port 0x64.
 	test	al, 0x02	; Test the second bit.
-	jnz	a20_waitc		; If it's 1, it's busy.
+	jnz	a20_waitc	; If it's 1, it's busy.
 	ret
 ; Wait for the keyboard controller to send data back.
 a20_waitd:
 	in	al, 0x64	; Read from port 0x64 again.
 	test	al, 0x01	; Test the first bit.
-	jz	a20_waitd		; If it's 1, the data is not ready to be sent.
+	jz	a20_waitd	; If it's 1, the data is not ready to be sent.
 	ret
 
 ; FastA20
@@ -174,7 +174,7 @@ a20_done:
 a20_fail:
 	mov	si, str_a20_fail
 	call	puts
-	jmp	$	
+	jmp	$
 
 ; Load kernel from disk to memory.
 kernel_load:
@@ -202,39 +202,39 @@ disk_packet:
 
 ; Set up the GDT (Global Descriptor Table).
 gdt:
-gdt_null:
+gdt_null:			; offset = 0x0
 	dq	0x00000000
 
-gdt_kernel_code:
+gdt_kernel_code:		; offset = 0x08
+	dw	0xffff		; segment limit 0..15
+	dw	0x0000		; segment base 0..15
+	db	0x00		; segment base 16..23 set for 0K
+	db	0x9f		; flags: type
+	db	0xcf		; flags: limit
+	db	0x00		; segment base 24..32
+
+gdt_kernel_data:		; offset = 0x10
 	dw	0xffff
 	dw	0x0000
 	db	0x00
-	db	10011010b
-	db	11001111b
+	db	0x93
+	db	0xcf
 	db	0x00
 
-gdt_kernel_data:
+gdt_userland_code:		; offset = 0x18
 	dw	0xffff
 	dw	0x0000
 	db	0x00
-	db	10010010b
-	db	11001111b
+	db	0x9e
+	db	0xcf
 	db	0x00
 
-gdt_userland_code:
+gdt_userland_data:		; offset = 0x20
 	dw	0xffff
 	dw	0x0000
 	db	0x00
-	db	11111010b
-	db	11001111b
-	db	0x00
-
-gdt_userland_data:
-	dw	0xffff
-	dw	0x0000
-	db	0x00
-	db	11110010b
-	db	11001111b
+	db	0x92
+	db	0xcf
 	db	0x00
 
 gdt_ptr:
