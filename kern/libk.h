@@ -23,7 +23,6 @@ int	isdigit(char);
 int	vsprintf(char *, const char *, va_list);
 int	sprintf(char *, const char *, ...);
 int	printf(const char *, ...);
-//int	kprintf(const char *, ...);
 void	panic(const char *, ...);
 
 #endif /* _KERNEL_LIBK_H_ */

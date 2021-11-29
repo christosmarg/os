@@ -104,6 +104,6 @@ kbd_callback(struct reg *r)
 void
 kbd_init(void)
 {
-	intr_register_handler(1, kbd_callback);
-	printf("kbd on irq %d\n", 1);
+	intr_register_handler(IRQ1, kbd_callback);
+	printf("kbd on irq 1\n");
 }

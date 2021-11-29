@@ -337,7 +337,6 @@ printf(const char *fmt, ...)
 	return (n);
 }
 
-/* TODO: print regs */
 void
 panic(const char *fmt, ...)
 {

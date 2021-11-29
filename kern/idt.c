@@ -18,27 +18,11 @@
 #define PIC_SLAVE_CMD	0xa0
 #define PIC_SLAVE_DATA	(PIC_SLAVE_CMD + 1)
 
-static void print_regs(struct reg *);
 static void idt_set_gate(struct gate_desc *, void *, uint16_t, uint8_t);
 static void pic_remap(void);
 
 static struct gate_desc idt[NINT];
 static intrhand_t isr[NISR] = { NULL };
-
-static void
-print_regs(struct reg *r)
-{
-	printf("eax=%#08x\tebx=%#08x\tecx=%#08x\tedx=%#08x\n",
-	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);
-	printf("esp=%#08x\tebp=%#08x\tesi=%#08x\tedi=%#08x\n",
-	    r->r_esp, r->r_ebp, r->r_esi, r->r_edi);
-	printf("ds=%#08x \tes=%#08x \tfs=%#08x \tgs=%#08x\n",
-	    r->r_ds, r->r_es, r->r_fs, r->r_gs);
-	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%08x\n",
-	    r->r_eip, r->r_cs, r->r_ss, r->r_eflags);
-	printf("int=%#08x\terr=%#08x\tuesp=%#08x\n",
-	    r->r_intrno, r->r_err, r->r_uesp);
-}
 
 static void
 idt_set_gate(struct gate_desc *gd, void *func, uint16_t sel, uint8_t flags)
@@ -129,7 +113,6 @@ idt_init(void)
 
 	pic_remap();
 
-	/* FIXME: how is this related to irq 0 -> timer etc? */
 	idt_set_gate(&idt[32], &INTVEC(irq0), SEL_KCODE,
 	    GT_FLAGS(PL_KERN, TP_386IGT));
 	idt_set_gate(&idt[33], &INTVEC(irq1), SEL_KCODE,
@@ -210,16 +193,15 @@ intr_handler(struct reg *r)
 {
 	intrhand_t handler;
 
-	/*
-	 * We'll call the handler only if the interrupt number is > 32,
-	 * which means that we're dealing with an IRQ and not an exception.
-	 */
-	if (r->r_intrno >= 32 && (handler = isr[r->r_intrno - 32]) != NULL)
+	if (r->r_intrno < 32)
+		printf("%s\n", exceptmsg[r->r_intrno]);
+	if ((handler = isr[r->r_intrno]) != NULL)
 		handler(r);
 	else if (r->r_intrno < 32) {
 		print_regs(r);
 		panic("%s: system halted...\n", exceptmsg[r->r_intrno]);
 	}
+	/* EOI */
 	if (r->r_intrno >= 40)
 		outb(PIC_SLAVE_CMD, 0x20);
 	outb(PIC_MASTER_CMD, 0x20);
@@ -229,4 +211,19 @@ void
 intr_register_handler(uint8_t intrno, intrhand_t handler)
 {
 	isr[intrno] = handler;
+}
+
+void
+print_regs(struct reg *r)
+{
+	printf("eax=%#08x\tebx=%#08x\tecx=%#08x\tedx=%#08x\n",
+	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);
+	printf("esp=%#08x\tebp=%#08x\tesi=%#08x\tedi=%#08x\n",
+	    r->r_esp, r->r_ebp, r->r_esi, r->r_edi);
+	printf("ds=%#08x \tes=%#08x \tfs=%#08x \tgs=%#08x\n",
+	    r->r_ds, r->r_es, r->r_fs, r->r_gs);
+	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%08x\n",
+	    r->r_eip, r->r_cs, r->r_ss, r->r_eflags);
+	printf("int=%#08x\terr=%#08x\tuesp=%#08x\n",
+	    r->r_intrno, r->r_err, r->r_uesp);
 }

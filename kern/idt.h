@@ -1,6 +1,8 @@
 #ifndef _KERNEL_IDT_H_
 #define _KERNEL_IDT_H_
 
+#include <stdint.h>
+
 #define INTVEC(name)	__CONCAT(intr_, name)
 
 /* IA-32 */
@@ -47,6 +49,25 @@ struct reg {
 	uint32_t	r_ss;
 };
 
+enum {
+	IRQ0 = 32,
+	IRQ1,
+	IRQ2,
+	IRQ3,
+	IRQ4,
+	IRQ5,
+	IRQ6,
+	IRQ7,
+	IRQ8,
+	IRQ9,
+	IRQ10,
+	IRQ11,
+	IRQ12,
+	IRQ13,
+	IRQ14,
+	IRQ15,
+};
+
 typedef void (*intrhand_t)(struct reg *);
 
 /* Called by `kern_main`. */
@@ -55,5 +76,6 @@ void idt_init(void);
 /* Called by drivers. */
 void intr_handler(struct reg *);
 void intr_register_handler(uint8_t, intrhand_t); 
+void print_regs(struct reg *); /* FIXME: move elsewhere? */
 
 #endif /* _KERNEL_IDT_H_ */

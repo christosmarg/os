@@ -84,3 +84,5 @@ intr_common_stub:
 	add	esp, 8		; Clean up ISR info.
 	sti
 	iret			; I spent many hours debugging this...
+
+; TODO: irq_common_stub bx?

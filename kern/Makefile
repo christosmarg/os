@@ -18,7 +18,8 @@ OBJ = kern_main.o \
       intr.o \
       vga.o \
       kbd.o \
-      timer.o
+      timer.o \
+      page.o
 
 all: options ${BIN}
 

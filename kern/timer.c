@@ -18,12 +18,13 @@ timer_callback(struct reg *r)
 void
 timer_init(void)
 {
-	const uint32_t hz = 60;
+	const uint32_t hz = 100;
 	uint32_t div = 1193180 / hz;
 
-	intr_register_handler(0, timer_callback);
+	intr_register_handler(IRQ0, timer_callback);
+	/* Repating mode. */
 	outb(TIMER_CMD, 0x36);
 	outb(TIMER_DATA, (uint8_t)(div & 0xff));
 	outb(TIMER_DATA, (uint8_t)((div >> 8) & 0xff));
-	printf("timer on irq %d\n", 0);
+	printf("timer on irq 0\n");
 }
