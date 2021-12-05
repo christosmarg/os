@@ -1,58 +1,50 @@
-#ifndef _KERNEL_IO_H_
-#define _KERNEL_IO_H_
+#ifndef _IO_H_
+#define _IO_H_
 
-#include <stdint.h>
-#include "idt.h"
+#include <u.h>
+#include <reg.h>
 
-struct region_descriptor;
-
-static inline void
-lidt(struct region_desc *rd)
+static inline u_int8_t
+inb(u_int16_t port)
 {
-	__asm__ __volatile("lidt (%0)" : : "r" (rd));
-}
-
-static inline uint8_t
-inb(uint16_t port)
-{
-	uint8_t res;
+	u_int8_t res;
 
 	__asm__ __volatile("in %%dx, %%al" : "=a" (res) : "d" (port));
 	return (res);
 }
 
 static inline void
-outb(uint16_t port, uint8_t v)
+outb(u_int16_t port, u_int8_t v)
 {
 	__asm__ __volatile("out %%al, %%dx" : : "a" (v), "d" (port));
 }
 
-static inline uint16_t
-inw(uint16_t port)
+static inline u_int16_t
+inw(u_int16_t port)
 {
-	uint16_t res;
+	u_int16_t res;
 
 	__asm__ __volatile("in %%dx, %%ax" : "=a" (res) : "d" (port));
 	return (res);
 }
 
 static inline void
-outw(uint16_t port, uint16_t v)
+outw(u_int16_t port, u_int16_t v)
 {
 	__asm__ __volatile("out %%ax, %%dx" : : "a" (v), "d" (port));
 }
 
-static inline uint32_t
-inl(uint16_t port)
+static inline u_int32_t
+inl(u_int16_t port)
 {
-	uint32_t res;
+	u_int32_t res;
 
 	__asm__ __volatile("in %%dx, %%eax" : "=a" (res) : "d" (port));
 	return (res);
 }
 
 static inline void
-outl(uint16_t port, uint32_t v)
+outl(u_int16_t port, u_int32_t v)
 {
 	__asm__ __volatile("out %%eax, %%dx" : : "a" (v), "d" (port));
 }
@@ -75,4 +67,4 @@ sti(void)
 	__asm__ __volatile("sti");
 }
 
-#endif /* _KERNEL_IO_H_ */
+#endif /* _IO_H_ */

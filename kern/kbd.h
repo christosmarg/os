@@ -1,6 +1,6 @@
-#ifndef _KERNEL_KBD_H_
-#define _KERNEL_KBD_H_
+#ifndef _KBD_H_
+#define _KBD_H_
 
 void kbd_init(void);
 
-#endif /* _KERNEL_KBD_H_ */
+#endif /* _KBD_H_ */

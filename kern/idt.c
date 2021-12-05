@@ -1,9 +1,9 @@
 #include "libk.h"
 #include "idt.h"
+#include "io.h"
 
 #define NINT		256
 #define NRSVINT		32
-#define NISR		16
 #define PL_KERN		0	/* Kernel privilege level */
 #define PL_DRV1		1	/* Device driver privilege level 1 */
 #define PL_DRV2		2	/* Device driver privilege level 2 */
@@ -18,20 +18,20 @@
 #define PIC_SLAVE_CMD	0xa0
 #define PIC_SLAVE_DATA	(PIC_SLAVE_CMD + 1)
 
-static void idt_set_gate(struct gate_desc *, void *, uint16_t, uint8_t);
+static void idt_set_gate(struct gate_desc *, void *, u_int16_t, u_int8_t);
 static void pic_remap(void);
 
 static struct gate_desc idt[NINT];
-static intrhand_t isr[NISR] = { NULL };
+static intrhand_t isr[NINT] = { NULL };
 
 static void
-idt_set_gate(struct gate_desc *gd, void *func, uint16_t sel, uint8_t flags)
+idt_set_gate(struct gate_desc *gd, void *func, u_int16_t sel, u_int8_t flags)
 {
-	gd->gd_off_lo = (uint32_t)func & 0xffff;
+	gd->gd_off_lo = (u_int32_t)func & 0xffff;
 	gd->gd_sel = sel;
 	gd->gd_rsvd = 0;
 	gd->gd_flags = flags;
-	gd->gd_off_hi = ((uint32_t)func >> 16) & 0xffff;
+	gd->gd_off_hi = ((u_int32_t)func >> 16) & 0xffff;
 }
 
 /* TODO: explain. */
@@ -148,9 +148,9 @@ idt_init(void)
 
 	/*idt_set_gate(&idt[127], &syscall, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));*/
 
-	r_idt.rd_base = (uint32_t)&idt;
+	r_idt.rd_base = (u_int32_t)&idt;
 	r_idt.rd_limit = NINT * sizeof(struct gate_desc) - 1;
-	lidt(&r_idt);
+	__asm__ __volatile("lidt (%0)" : : "r" (&r_idt));
 }
 
 static const char *exceptmsg[] = {
@@ -193,6 +193,7 @@ intr_handler(struct reg *r)
 {
 	intrhand_t handler;
 
+	/* TODO: dprintf? */
 	if (r->r_intrno < 32)
 		printf("%s\n", exceptmsg[r->r_intrno]);
 	if ((handler = isr[r->r_intrno]) != NULL)
@@ -208,11 +209,12 @@ intr_handler(struct reg *r)
 }
 
 void
-intr_register_handler(uint8_t intrno, intrhand_t handler)
+intr_register_handler(u_int8_t intrno, intrhand_t handler)
 {
 	isr[intrno] = handler;
 }
 
+/* FIXME: not 8? */
 void
 print_regs(struct reg *r)
 {

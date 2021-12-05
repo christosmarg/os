@@ -4,8 +4,11 @@ BINDIR = ../build
 CC = cc
 ASM = nasm
 LD = ld
-INCDIR = ../include
-CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2 -I${INCDIR}
+ARCH=i386
+ARCHINCDIR = ../${ARCH}
+INCDIR=../include
+CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2 \
+	 -I${ARCHINCDIR} -I${INCDIR}
 LDFLAGS = -Ttext 0x1000 --oformat binary
 
 BOOTFILE = boot.s
@@ -19,7 +22,7 @@ OBJ = kern_main.o \
       vga.o \
       kbd.o \
       timer.o \
-      page.o
+      vm_page.o
 
 all: options ${BIN}
 

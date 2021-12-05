@@ -1,24 +1,25 @@
-#include "libk.h"
+#include "vga.h"
+#include "io.h"
 
 #define VGA_MEM		0xb8000;
 #define VGA_COLS	80
 #define VGA_ROWS	25
-#define VGA_PUTC(c)	(((uint16_t)vga.color << 8) | (c))
+#define VGA_PUTC(c)	(((u_int16_t)vga.color << 8) | (c))
 
 #define CURS_CMD	0x3d4
 #define CURS_DATA	0x3d5
 
 struct vga_info {
-	volatile uint16_t *buf;
+	volatile u_int16_t *buf;
 	size_t row;
 	size_t col;
-	uint8_t color;
+	u_int8_t color;
 };
 
 static struct vga_info vga;
 
 void
-vga_clear(uint8_t fg, uint8_t bg)
+vga_clear(u_int8_t fg, u_int8_t bg)
 {
 	size_t y, x;
 
@@ -26,7 +27,7 @@ vga_clear(uint8_t fg, uint8_t bg)
 	vga_curs_setpos(0, 0);
 	vga.row = 0;
 	vga.col = 0;
-	vga.buf = (uint16_t *)VGA_MEM;
+	vga.buf = (u_int16_t *)VGA_MEM;
 	vga_set_color(fg, bg);
 	for (x = 0; x < VGA_COLS; x++)
 		for (y = 0; y < VGA_ROWS; y++)
@@ -34,7 +35,7 @@ vga_clear(uint8_t fg, uint8_t bg)
 }
 
 void
-vga_set_color(uint8_t fg, uint8_t bg)
+vga_set_color(u_int8_t fg, u_int8_t bg)
 {
 	vga.color = fg | (bg << 4);
 }
@@ -88,7 +89,7 @@ vga_write(const char *str)
  * with `start = 0x00` and `end = 0x0f` is effectively a block cursor.
  */
 void
-vga_curs_enable(uint8_t start, uint8_t end)
+vga_curs_enable(u_int8_t start, u_int8_t end)
 {
 	/* 0x0a: Low cursor shape */
 	outb(CURS_CMD, 0x0a);
@@ -114,13 +115,13 @@ vga_curs_disable(void)
  * x = pos % VGA_COLS
  * y = pos / VGA_COLS
  */
-uint16_t
+u_int16_t
 vga_curs_getpos(void)
 {
-	uint16_t pos = 0;
+	u_int16_t pos = 0;
 
 	outb(CURS_CMD, 0x0e);
-	pos |= (uint16_t)inb(CURS_DATA) << 8;
+	pos |= (u_int16_t)inb(CURS_DATA) << 8;
 	outb(CURS_CMD, 0x0f);
 	pos |= inb(CURS_DATA);
 
@@ -130,10 +131,10 @@ vga_curs_getpos(void)
 void
 vga_curs_setpos(int x, int y)
 {
-	uint16_t pos = y * VGA_COLS + x;
+	u_int16_t pos = y * VGA_COLS + x;
 
 	outb(CURS_CMD, 0x0e);
-	outb(CURS_DATA, (uint8_t)((pos >> 8) & 0xff));
+	outb(CURS_DATA, (u_int8_t)((pos >> 8) & 0xff));
 	outb(CURS_CMD, 0x0f);
-	outb(CURS_DATA, (uint8_t)(pos & 0xff));
+	outb(CURS_DATA, (u_int8_t)(pos & 0xff));
 }

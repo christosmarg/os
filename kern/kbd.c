@@ -1,6 +1,9 @@
+#include <libc.h>
 #include "libk.h"
 #include "kbd.h"
 #include "idt.h"
+#include "io.h"
+#include "vga.h"
 
 #define KBD_CMD		0x60
 #define KBD_PRESSED	0x80
@@ -90,7 +93,7 @@ static unsigned char kbdus_lower[128] = {
 static void
 kbd_callback(struct reg *r)
 {
-	uint8_t sc;
+	u_int8_t sc;
 	int shift = 0;
 
 	if ((sc = inb(KBD_CMD)) & KBD_PRESSED) {

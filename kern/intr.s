@@ -4,7 +4,6 @@
 %macro intr_noerr 2
 global intr_%1
 intr_%1:
-	cli
 	push	byte 0
 	push	byte %2
 	jmp	intr_common_stub
@@ -13,7 +12,6 @@ intr_%1:
 %macro intr_err 2
 global intr_%1
 intr_%1:
-	cli
 	push	byte %2
 	jmp	intr_common_stub
 %endmacro
@@ -82,7 +80,6 @@ intr_common_stub:
 	pop	ds
 	popa
 	add	esp, 8		; Clean up ISR info.
-	sti
 	iret			; I spent many hours debugging this...
 
 ; TODO: irq_common_stub bx?

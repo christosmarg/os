@@ -1,8 +1,8 @@
 #include "libk.h"
-#include "page.h"
 #include "idt.h"
+#include "vm_page.h"
 
 void
-page_init(void)
+vm_page_init(void)
 {
 }

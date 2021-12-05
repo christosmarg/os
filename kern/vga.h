@@ -1,9 +1,9 @@
-#ifndef _KERNEL_VGA_H_
-#define _KERNEL_VGA_H_
+#ifndef _VGA_H_
+#define _VGA_H_
 
-#include <stddef.h>
+#include <u.h>
 
-enum vga_color: uint8_t {
+enum vga_color {
 	VGA_BLACK = 0,
 	VGA_BLUE,
 	VGA_GREEN,
@@ -22,13 +22,13 @@ enum vga_color: uint8_t {
 	VGA_WHITE,
 };
 
-void vga_clear(uint8_t, uint8_t);
-void vga_set_color(uint8_t, uint8_t);
+void vga_clear(u_int8_t, u_int8_t);
+void vga_set_color(u_int8_t, u_int8_t);
 void vga_putc(char);
 void vga_write(const char *);
-void vga_curs_enable(uint8_t, uint8_t);
+void vga_curs_enable(u_int8_t, u_int8_t);
 void vga_curs_disable(void);
 void vga_curs_setpos(int, int);
-uint16_t vga_curs_getpos(void);
+u_int16_t vga_curs_getpos(void);
 
-#endif /* _KERNEL_VGA_H_ */
+#endif /* _VGA_H_ */
