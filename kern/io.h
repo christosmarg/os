@@ -2,7 +2,6 @@
 #define _IO_H_
 
 #include <u.h>
-#include <reg.h>
 
 static inline u_int8_t
 inb(u_int16_t port)

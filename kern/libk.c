@@ -29,8 +29,8 @@ div(long *n, int base)
 {
 	int res;
 
-	res = (unsigned long)*n % (unsigned int)base;
-	*n = (unsigned long)*n / (unsigned int)base;
+	res = (u_long)*n % (u_int)base;
+	*n = (u_long)*n / (u_int)base;
 	return (res);
 }
 
@@ -106,7 +106,7 @@ itoa(char *str, long num, int base, int size, int precision, int flags)
 void *
 memset(void *dst, int v, size_t len)
 {
-	unsigned char *dst0;
+	u_char *dst0;
 	
 	dst0 = dst;
 	while (len--)
@@ -118,8 +118,8 @@ memset(void *dst, int v, size_t len)
 void *
 memcpy(void *dst, const void *src, size_t len)
 {
-	const unsigned char *src0;
-	unsigned char *dst0;
+	const u_char *src0;
+	u_char *dst0;
 
 	src0 = src;
 	dst0 = dst;
@@ -183,7 +183,7 @@ strcmp(const char *s1, const char *s2)
 		if (*s1++ == '\0')
 			return (0);
 
-	return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
+	return (*(const u_char *)s1 - *(const u_char *)(s2 - 1));
 }
 
 int
@@ -258,7 +258,7 @@ repeat:
 			if (!(flags & LEFT))
 				while (--size > 0)
 					*str++ = ' ';
-			*str++ = (unsigned char)va_arg(ap, int);
+			*str++ = (u_char)va_arg(ap, int);
 			while (--size > 0)
 				*str++ = ' ';
 			continue;
@@ -279,7 +279,7 @@ repeat:
 				flags |= ZEROPAD;
 			}
 			str = itoa(str,
-			    (unsigned long)va_arg(ap, void *), 16,
+			    (u_long)va_arg(ap, void *), 16,
 			    size, precision, flags);
 			continue;
 		case 'n':
@@ -318,15 +318,15 @@ repeat:
 		}
 
 		if (qual == 'l')
-			n = va_arg(ap, unsigned long);
+			n = va_arg(ap, u_long);
 		else if (qual == 'h') {
-			n = (unsigned short)va_arg(ap, int);
+			n = (u_short)va_arg(ap, int);
 			if (flags & SIGN)
 				n = (short)n;
 		} else if (flags & SIGN)
 			n = va_arg(ap, int);
 		else
-			n = va_arg(ap, unsigned int);
+			n = va_arg(ap, u_int);
 		str = itoa(str, n, base, size, precision, flags);
 	}
 	*str = '\0';

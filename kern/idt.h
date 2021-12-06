@@ -4,19 +4,53 @@
 #include <u.h>
 #include <reg.h>
 
-#define INTVEC(name)	__CONCAT(intr_, name)
+#define INTVEC(name)	CONCAT(intr_, name)
+
+#define NINT		256		/* number of interrupts */
+
+/* gdt segments */
+#define NULLSEG		0		/* null segment */
+#define KCSEG		1		/* kernel code segment */
+#define KDSEG		2		/* kernel data segment */
+#define UCSEG		3		/* user code segment */
+#define UDSEG		4		/* kernel data segment */
+/* TODO: 9front mem.h */
+
+#define SELGDT		(0 << 2)	/* selector is in gdt */
+#define SELLDT		(1 << 2)	/* selector is in ldt */
+
+#define SEGIG		(0x0e << 8)	/* interrupt gate */
+#define SEGPL(x)	((x) << 13)	/* priority level */
+#define SEGP		(1 << 15)	/* segment present */
+
+#define KPL		0		/* kernel priority level */
+#define DPL1		1		/* device driver priority level 1 */
+#define DPL2		2		/* device driver priority level 2 */
+#define UPL		3		/* user priority level */
+
+#define SELECTOR(i, t, p)	(((i) << 3) | (t) | (p))
+
+/* selectors */
+#define NULLSEL		SELECTOR(NULLSEG, SELGDT, KPL)
+#define KDSEL		SELECTOR(KDSEG, SELGDT, KPL)
+#define KCSEL		SELECTOR(KCSEG, SELGDT, KPL)
+#define UCSEL		SELECTOR(UCSEG, SELGDT, UPL)
+#define UDSEL		SELECTOR(UDSEG, SELGDT, UPL)
+/* TODO: 9front mem.h */
+
+#define PIC_MASTER_CMD	0x20
+#define PIC_MASTER_DATA	(PIC_MASTER_CMD + 1)
+#define PIC_SLAVE_CMD	0xa0
+#define PIC_SLAVE_DATA	(PIC_SLAVE_CMD + 1)
 
 struct gate_desc {
-	u_int16_t	gd_off_lo;
-	u_int16_t	gd_sel;
-	u_int8_t	gd_rsvd;
-	u_int8_t	gd_flags; /* type, dpl, p */
-	u_int16_t	gd_off_hi;
+	u_int32_t gd_lo;
+	u_int32_t gd_hi;
 } __packed;
 
 struct region_desc {
-	u_int16_t	rd_limit;
-	u_int32_t	rd_base;
+	u_int16_t rd_limit;
+	u_int32_t rd_base;
 } __packed;
 
 enum {
@@ -43,6 +77,6 @@ typedef void (*intrhand_t)(struct reg *);
 void idt_init(void);
 void intr_handler(struct reg *);
 void intr_register_handler(u_int8_t, intrhand_t); 
-void print_regs(struct reg *); /* FIXME: move elsewhere? */
+void dump_regs(struct reg *); /* FIXME: move elsewhere? */
 
 #endif /* _IDT_H_ */

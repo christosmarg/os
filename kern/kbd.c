@@ -14,7 +14,7 @@
 
 static void kbd_callback(struct reg *);
 
-static unsigned char kbdus_upper[128] = {
+static u_char kbdus_upper[128] = {
 	0,	/* Error */
 	27,	/* Escape */
 	'!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
@@ -52,7 +52,7 @@ static unsigned char kbdus_upper[128] = {
 	0,	/* The rest are undefined */
 };
 
-static unsigned char kbdus_lower[128] = {
+static u_char kbdus_lower[128] = {
 	0,	/* Error */
 	27,	/* Escape */
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',

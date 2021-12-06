@@ -1,37 +1,22 @@
+#include <libc.h>
 #include "libk.h"
 #include "idt.h"
 #include "io.h"
 
-#define NINT		256
-#define NRSVINT		32
-#define PL_KERN		0	/* Kernel privilege level */
-#define PL_DRV1		1	/* Device driver privilege level 1 */
-#define PL_DRV2		2	/* Device driver privilege level 2 */
-#define PL_USER		3	/* User privilege level */
-#define SEL_KCODE	0x08	/* Kernel code descriptor */
-#define TP_386IGT	0xe	/* System 386 interrupt gate */
-/* Type 0..3, DPL 4..6, P 7..8 */
-#define GT_FLAGS(r, t)	((1<<7) | (r<<5) | t)
-
-#define PIC_MASTER_CMD	0x20
-#define PIC_MASTER_DATA	(PIC_MASTER_CMD + 1)
-#define PIC_SLAVE_CMD	0xa0
-#define PIC_SLAVE_DATA	(PIC_SLAVE_CMD + 1)
-
-static void idt_set_gate(struct gate_desc *, void *, u_int16_t, u_int8_t);
+static void idt_set_gate(struct gate_desc *, void *, u_int, u_int, u_int);
 static void pic_remap(void);
 
 static struct gate_desc idt[NINT];
 static intrhand_t isr[NINT] = { NULL };
 
 static void
-idt_set_gate(struct gate_desc *gd, void *func, u_int16_t sel, u_int8_t flags)
+idt_set_gate(struct gate_desc *gd, void *func, u_int sel, u_int dpl, u_int type)
 {
-	gd->gd_off_lo = (u_int32_t)func & 0xffff;
-	gd->gd_sel = sel;
-	gd->gd_rsvd = 0;
-	gd->gd_flags = flags;
-	gd->gd_off_hi = ((u_int32_t)func >> 16) & 0xffff;
+	u_int32_t addr;
+
+	addr = (u_int32_t)func;
+	gd->gd_hi = (addr & 0xffff0000) | SEGP | dpl | type;
+	gd->gd_lo = (sel << 16) | (addr & 0xffff);
 }
 
 /* TODO: explain. */
@@ -67,125 +52,88 @@ idt_init(void)
 	int i;
 
 	for (i = 0; i < NINT; i++)
-		idt_set_gate(&idt[i], &INTVEC(rsvd), SEL_KCODE,
-		    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 0], &INTVEC(div), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 1], &INTVEC(dbg), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 2], &INTVEC(nmsk), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 3], &INTVEC(bpt), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 4], &INTVEC(ofl), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 5], &INTVEC(bnd), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 6], &INTVEC(ill), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 7], &INTVEC(dna), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 8], &INTVEC(dbl), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[ 9], &INTVEC(fpusegm), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[10], &INTVEC(tss), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[11], &INTVEC(missing), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[12], &INTVEC(stk), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[13], &INTVEC(prot), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[14], &INTVEC(page), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[15], &INTVEC(rsvd), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[16], &INTVEC(fpu), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[17], &INTVEC(align), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[18], &INTVEC(mchk), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[19], &INTVEC(simd), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
+		idt_set_gate(&idt[i], &INTVEC(rsvd), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 0], &INTVEC(div), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 1], &INTVEC(dbg), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 2], &INTVEC(nmsk), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 3], &INTVEC(bpt), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 4], &INTVEC(ofl), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 5], &INTVEC(bnd), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 6], &INTVEC(ill), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 7], &INTVEC(dna), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 8], &INTVEC(dbl), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[ 9], &INTVEC(fpusegm), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[10], &INTVEC(tss), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[11], &INTVEC(missing), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[12], &INTVEC(stk), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[13], &INTVEC(prot), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[14], &INTVEC(page), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[15], &INTVEC(rsvd), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[16], &INTVEC(fpu), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[17], &INTVEC(align), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[18], &INTVEC(mchk), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[19], &INTVEC(simd), KCSEL, SEGPL(KPL), SEGIG);
 	/* 20 - 31 are reserved. */
 
 	pic_remap();
 
-	idt_set_gate(&idt[32], &INTVEC(irq0), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[33], &INTVEC(irq1), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[34], &INTVEC(irq2), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[35], &INTVEC(irq3), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[36], &INTVEC(irq4), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[37], &INTVEC(irq5), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[38], &INTVEC(irq6), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[39], &INTVEC(irq7), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[40], &INTVEC(irq8), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[41], &INTVEC(irq9), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[42], &INTVEC(irq10), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[43], &INTVEC(irq11), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[44], &INTVEC(irq12), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[45], &INTVEC(irq13), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[46], &INTVEC(irq14), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
-	idt_set_gate(&idt[47], &INTVEC(irq15), SEL_KCODE,
-	    GT_FLAGS(PL_KERN, TP_386IGT));
+	idt_set_gate(&idt[32], &INTVEC(irq0), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[33], &INTVEC(irq1), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[34], &INTVEC(irq2), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[35], &INTVEC(irq3), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[36], &INTVEC(irq4), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[37], &INTVEC(irq5), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[38], &INTVEC(irq6), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[39], &INTVEC(irq7), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[40], &INTVEC(irq8), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[41], &INTVEC(irq9), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[42], &INTVEC(irq10), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[43], &INTVEC(irq11), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[44], &INTVEC(irq12), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[45], &INTVEC(irq13), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[46], &INTVEC(irq14), KCSEL, SEGPL(KPL), SEGIG);
+	idt_set_gate(&idt[47], &INTVEC(irq15), KCSEL, SEGPL(KPL), SEGIG);
 
-	/*idt_set_gate(&idt[127], &syscall, SEL_KCODE, GT_FLAGS(PL_KERN, TP_386IGT));*/
+	/*idt_set_gate(&idt[127], &syscall, KCSEL, SEGPL(UPL), SEGIG);*/
 
 	r_idt.rd_base = (u_int32_t)&idt;
 	r_idt.rd_limit = NINT * sizeof(struct gate_desc) - 1;
 	__asm__ __volatile("lidt (%0)" : : "r" (&r_idt));
 }
 
-static const char *exceptmsg[] = {
-	"Division By Zero Exception",
-	"Debug Exception",
-	"Non Maskable Interrupt Exception",
-	"Breakpoint Exception",
-	"Detected Overflow Exception",
-	"Out of Bounds Exception",
-	"Invalid Opcode Exception",
-	"No Coprocessor Exception",
-	"Double Fault Exception",
-	"Coprocessor Segment Overrun Exception",
-	"Bad TSS Exception",
-	"Segment Not Present Exception",
-	"Stack Fault Exception",
-	"General Protection Fault Exception",
-	"Page Fault Exception",
-	"Unknown Interrupt Exception",
-	"Coprocessor Fault Exception",
-	"Alignment Check Exception (486+)",
-	"Machine Check Exception (Pentium/586+)",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
-	"Reserved Exception",
+static const char *exceptmsg[32] = {
+	"division by zero",
+	"debug exception",
+	"non maskable interrupt",
+	"breakpoint",
+	"overflow",
+	"out of bounds",
+	"invalid opcode",
+	"no coprocessor",
+	"double fault",
+	"coprocessor segment overrun",
+	"bad tss",
+	"segment not present",
+	"stack fault",
+	"general protection fault",
+	"page fault",
+	"15 (reserved)",
+	"coprocessor fault",
+	"alignment check exception (486+)",
+	"machine check exception (pentium/586+)",
+	"simd error",
+	"20 (reserved)",
+	"21 (reserved)",
+	"22 (reserved)",
+	"23 (reserved)",
+	"24 (reserved)",
+	"25 (reserved)",
+	"26 (reserved)",
+	"27 (reserved)",
+	"28 (reserved)",
+	"29 (reserved)",
+	"30 (reserved)",
+	"31 (reserved)",
 };
 
 void
@@ -194,13 +142,14 @@ intr_handler(struct reg *r)
 	intrhand_t handler;
 
 	/* TODO: dprintf? */
-	if (r->r_intrno < 32)
-		printf("%s\n", exceptmsg[r->r_intrno]);
+	/* XXX: why did i write this in the first place???? */
+	if (r->r_intrno < ARRLEN(exceptmsg))
+		printf("sys: trap: %s\n", exceptmsg[r->r_intrno]);
 	if ((handler = isr[r->r_intrno]) != NULL)
 		handler(r);
-	else if (r->r_intrno < 32) {
-		print_regs(r);
-		panic("%s: system halted...\n", exceptmsg[r->r_intrno]);
+	else if (r->r_intrno < ARRLEN(exceptmsg)) {
+		dump_regs(r);
+		panic("%s: system halted\n", exceptmsg[r->r_intrno]);
 	}
 	/* EOI */
 	if (r->r_intrno >= 40)
@@ -214,9 +163,9 @@ intr_register_handler(u_int8_t intrno, intrhand_t handler)
 	isr[intrno] = handler;
 }
 
-/* FIXME: not 8? */
+/* FIXME: not #08? */
 void
-print_regs(struct reg *r)
+dump_regs(struct reg *r)
 {
 	printf("eax=%#08x\tebx=%#08x\tecx=%#08x\tedx=%#08x\n",
 	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);
