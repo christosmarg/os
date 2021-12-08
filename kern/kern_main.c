@@ -1,3 +1,4 @@
+#include <libc.h>
 #include "kbd.h"
 #include "idt.h"
 #include "io.h"
@@ -5,6 +6,9 @@
 #include "vm_page.h"
 #include "vga.h"
 
+/* TODO: make kset/unsetenv */
+/* TODO: make device framework */
+/* TODO: add a config */
 /* TODO: make sysctl */
 void
 kern_main(void) 

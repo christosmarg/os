@@ -1,33 +1,37 @@
-BIN = os.bin
-BINDIR = ../build
+BIN= 		os.bin
+BINDIR= 	../build
 
-CC = cc
-ASM = nasm
-LD = ld
-ARCH=i386
-ARCHINCDIR = ../${ARCH}
-INCDIR=../include
-CFLAGS = -g -m32 -nostdlib -ffreestanding -Wall -Wextra -std=c99 -O2 \
-	 -I${ARCHINCDIR} -I${INCDIR}
-LDFLAGS = -Ttext 0x1000 --oformat binary
+CC= 		cc
+ASM= 		nasm
+LD= 		ld
+ARCH= 		i386 # FIXME: make this automatic
+ARCHINCDIR= 	../${ARCH}
+INCDIR=		../include
+LINKSCRIPT=	link.ld
+CFLAGS= 	-g -m32 -Wall -Wextra -Werror -std=c99 -O2 \
+		-nostdlib -nodefaultlibs \
+		-ffreestanding -fno-stack-protector -fno-builtin \
+		-I${ARCHINCDIR} -I${INCDIR}
+LDFLAGS= 	-T${LINKSCRIPT} --oformat binary -melf_${ARCH}
 
-BOOTFILE = boot.s
-BOOT_BIN = boot.bin
-KERNEL_BIN = kernel.bin
-SRC = *.c *.s
-OBJ = kern_main.o \
-      libk.o \
-      idt.o \
-      intr.o \
-      vga.o \
-      kbd.o \
-      timer.o \
-      vm_page.o
+BOOTFILE= 	boot.s
+BOOT_BIN= 	boot.bin
+KERNEL_BIN= 	kernel.bin
+SRC= 		*.c *.s
+OBJ= 		kern_main.o \
+		libk.o \
+		idt.o \
+		intr.o \
+		vga.o \
+		kbd.o \
+		timer.o \
+		vm_page.o
 
 all: options ${BIN}
 
 options:
 	@echo ${BIN} build options
+	@echo ARCH	= ${ARCH}
 	@echo CC	= ${CC}
 	@echo ASM	= ${ASM}
 	@echo LD	= ${LD}

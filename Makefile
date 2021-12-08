@@ -1,10 +1,10 @@
-TGTDIR = build
+TGTDIR=		build
 
 all:
 	cd kern && make install clean && cd -
 
 run:
-	qemu-system-i386 -hdd ${TGTDIR}/os.bin
+	qemu-system-i386 -hda ${TGTDIR}/os.bin -serial stdio
 
 clean:
 	rm -rf ${TGTDIR}

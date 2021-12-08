@@ -76,7 +76,7 @@ typedef void (*intrhand_t)(struct reg *);
 
 void idt_init(void);
 void intr_handler(struct reg *);
-void intr_register_handler(u_int8_t, intrhand_t); 
+void intr_register_handler(int, intrhand_t);
 void dump_regs(struct reg *); /* FIXME: move elsewhere? */
 
 #endif /* _IDT_H_ */

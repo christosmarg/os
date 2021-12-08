@@ -9,14 +9,14 @@
 #define CURS_CMD	0x3d4
 #define CURS_DATA	0x3d5
 
-struct vga_info {
+struct vga {
 	volatile u_int16_t *buf;
 	size_t row;
 	size_t col;
 	u_int8_t color;
 };
 
-static struct vga_info vga;
+static struct vga vga;
 
 void
 vga_clear(u_int8_t fg, u_int8_t bg)
@@ -56,7 +56,7 @@ vga_putc(char c)
 		vga.col = 0;
 		break;
 	case '\t':
-		vga.col += 8;
+		vga.col += 4;
 		break;
 	default:
 		vga.buf[vga.row * VGA_COLS + vga.col] = VGA_PUTC(c);

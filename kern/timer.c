@@ -5,28 +5,34 @@
 
 #define TIMER_CMD	0x43
 #define TIMER_DATA	0x40
+#define SQUARE_WAVE	0x36
+#define FREQ		1193180
+#define HZ		100
 
 static void timer_callback(struct reg *);
 
-static u_int32_t timer_ticks = 0;
+static u_int32_t ticks = 0;
 
 static void
 timer_callback(struct reg *r)
 {
-	timer_ticks++;
+	ticks++;
 	UNUSED(r);
 }
 
 void
 timer_init(void)
 {
-	const u_int32_t hz = 100;
-	u_int32_t div = 1193180 / hz;
+	u_int32_t div = FREQ / HZ;
 
 	intr_register_handler(IRQ0, timer_callback);
 	/* Repating mode. */
-	outb(TIMER_CMD, 0x36);
+	outb(TIMER_CMD, SQUARE_WAVE);
 	outb(TIMER_DATA, (u_int8_t)(div & 0xff));
-	outb(TIMER_DATA, (u_int8_t)((div >> 8) & 0xff));
+	outb(TIMER_DATA, (u_int8_t)(div >> 8));
 	printf("timer on irq 0\n");
+
+	/*outb(TIMER_CMD, SQUARE_WAVE);*/
+	/*outb(TIMER_DATA, 0);*/
+	/*outb(TIMER_DATA, 0);*/
 }

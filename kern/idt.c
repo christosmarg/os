@@ -158,12 +158,13 @@ intr_handler(struct reg *r)
 }
 
 void
-intr_register_handler(u_int8_t intrno, intrhand_t handler)
+intr_register_handler(int intrno, intrhand_t handler)
 {
+	if (intrno < 0 || intrno >= NINT)
+		panic("invalid interrupt number: %d\n", intrno);
 	isr[intrno] = handler;
 }
 
-/* FIXME: not #08? */
 void
 dump_regs(struct reg *r)
 {
@@ -173,7 +174,7 @@ dump_regs(struct reg *r)
 	    r->r_esp, r->r_ebp, r->r_esi, r->r_edi);
 	printf("ds=%#08x \tes=%#08x \tfs=%#08x \tgs=%#08x\n",
 	    r->r_ds, r->r_es, r->r_fs, r->r_gs);
-	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%08x\n",
+	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%#08x\n",
 	    r->r_eip, r->r_cs, r->r_ss, r->r_eflags);
 	printf("int=%#08x\terr=%#08x\tuesp=%#08x\n",
 	    r->r_intrno, r->r_err, r->r_uesp);

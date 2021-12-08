@@ -10,6 +10,7 @@ typedef unsigned long		u_long;
 typedef unsigned long long	u_vlong;
 typedef long long		vlong;
 
+/* FIXME: get rid of _t */
 typedef signed char		int8_t;
 typedef unsigned char		u_int8_t;
 typedef unsigned short		u_int16_t;
@@ -19,7 +20,7 @@ typedef int			int32_t;
 typedef unsigned long		u_int64_t;
 typedef long			int64_t;
 
-//typedef u_int64_t		size_t;
+typedef u_int64_t		u_size;
 
 typedef __va_list		va_list;
 #define va_start(ap, last)	__builtin_va_start((ap), (last))

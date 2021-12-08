@@ -4,6 +4,7 @@
 
 MAGICOFF	equ (0x7c00 + 510)
 KERNOFF		equ 0x1000
+STACKSIZE	equ 0x1000
 
 section .text
 	global _start
@@ -11,13 +12,15 @@ section .text
 ; Entry point.
 _start:
 	cli			; Disable interrupts.
+	jmp	0x0000:zeroseg
+zeroseg:
 	xor	ax, ax		; Clear segment registers.
 	mov	ds, ax
 	mov	es, ax
 	mov	fs, ax
 	mov	gs, ax
-	mov	ss, ax
-	mov	bp, 0x9000	; Set the base and stack pointers.
+	mov	ss, ax		; Stack starts at 0.
+	mov	bp, _start	; Set the base and stack pointers.
 	mov	sp, bp
 	cld			; Read strings from low to high.
 	sti			; Enable interrupts back.
@@ -195,7 +198,7 @@ diskerr:
 disk_packet:
 	.size	db 0x10
 	.zero	db 0x00
-	.count	dw 0x0f
+	.count	dw 0x0030	; FIXME: i don't know why this works...
 	.off16	dw KERNOFF
 	.seg16	dw 0x0000
 	.lba	dq 1
@@ -263,7 +266,7 @@ pm_init:
 	mov	gs, ax
 	mov	ss, ax
 
-	mov	ebp, 0x90000
+	mov	ebp, kern_stack_top
 	mov	esp, ebp
 
 	call	kernel_exec
@@ -294,9 +297,16 @@ putchar:
 str_diskerr:	db "Error loading disk.", 0x0a, 0x0d, 0x00
 str_a20_fail:	db "The A20 Line is disabled", 0x0a, 0x0d, 0x00
 
+; Hard disk.
 BOOTDRV:	db 0x80
 
 ; Padding to 512 bytes. The last 2 bytes will come from the magic number.
 times	510 - ($ - $$) db 0
 ; Magic number.
 dw	0xaa55
+
+section .bss
+	align	4096
+kern_stack_bottom: equ	$
+	resb	STACKSIZE
+kern_stack_top:

@@ -62,12 +62,13 @@ itoa(char *str, long num, int base, int size, int precision, int flags)
 			size--;
 		}
 	}
-	if (flags & SPECIAL) {
-		if (base == 8)
-			size--;
-		else if (base == 16)
-			size -= 2;
-	}
+	/* FIXME: what? */
+	/*if (flags & SPECIAL) {*/
+		/*if (base == 8)*/
+			/*size--;*/
+		/*else if (base == 16)*/
+			/*size -= 2;*/
+	/*}*/
 	i = 0;
 	if (!num)
 		tmp[i++] = '0';
