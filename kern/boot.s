@@ -3,8 +3,9 @@
 [bits 16]
 
 MAGICOFF	equ (0x7c00 + 510)
+KERNLOAD	equ 0x1000
 KERNOFF		equ 0x1000
-STACKSIZE	equ 0x1000
+STACKSIZE	equ 8*1024*1024
 
 section .text
 	global _start
@@ -12,15 +13,13 @@ section .text
 ; Entry point.
 _start:
 	cli			; Disable interrupts.
-	jmp	0x0000:zeroseg
-zeroseg:
 	xor	ax, ax		; Clear segment registers.
 	mov	ds, ax
 	mov	es, ax
 	mov	fs, ax
 	mov	gs, ax
 	mov	ss, ax		; Stack starts at 0.
-	mov	bp, _start	; Set the base and stack pointers.
+	mov	bp, _start
 	mov	sp, bp
 	cld			; Read strings from low to high.
 	sti			; Enable interrupts back.
@@ -196,12 +195,12 @@ diskerr:
 	jmp	$		; There's nothing we can do at this point.
 
 disk_packet:
-	.size	db 0x10
-	.zero	db 0x00
-	.count	dw 0x0030	; FIXME: i don't know why this works...
-	.off16	dw KERNOFF
-	.seg16	dw 0x0000
-	.lba	dq 1
+	size:	db 0x10
+	zero:	db 0x00
+	count:	dw 0x0030	; FIXME: i don't know why this works...
+	off16:	dw KERNLOAD
+	seg16:	dw 0x0000
+	lba:	dq 1
 
 ; Set up the GDT (Global Descriptor Table).
 gdt:
@@ -266,14 +265,9 @@ pm_init:
 	mov	gs, ax
 	mov	ss, ax
 
-	mov	ebp, kern_stack_top
-	mov	esp, ebp
+	mov	esp, kern_stack_top
 
-	call	kernel_exec
-	jmp	$
-
-; Hand control over to the C kernel. Godspeed! You Black Emperor.
-kernel_exec:
+	; Hand control over to the C kernel. Godspeed! You Black Emperor.
 	call	KERNOFF
 	jmp	$
 
@@ -307,6 +301,6 @@ dw	0xaa55
 
 section .bss
 	align	4096
-kern_stack_bottom: equ	$
+kern_stack_bottom:
 	resb	STACKSIZE
 kern_stack_top:

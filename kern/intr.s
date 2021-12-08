@@ -64,22 +64,24 @@ intr_common_stub:
 	push	es
 	push	fs
 	push	gs
+
 	mov	ax, 0x10	; Kernel data segment descriptor.
 	mov	ds, ax
 	mov	es, ax
 	mov	fs, ax
 	mov	gs, ax
-	mov	eax, esp	; Push the stack.
-	push	eax
-	mov	eax, intr_handler 
-	call	eax
-	pop	eax
+	cld	
+
+	push	esp
+	call	intr_handler
+	add	esp, 4
+
 	pop	gs
 	pop	fs
 	pop	es
 	pop	ds
 	popa
-	add	esp, 8		; Clean up ISR info.
+	add	esp, 8
 	iret			; I spent many hours debugging this...
 
 ; TODO: irq_common_stub bx?

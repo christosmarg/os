@@ -1,10 +1,10 @@
 #include <libc.h>
 #include "libk.h"
 #include "idt.h"
+#include "pic.h"
 #include "io.h"
 
 static void idt_set_gate(struct gate_desc *, void *, u_int, u_int, u_int);
-static void pic_remap(void);
 
 static struct gate_desc idt[NINT];
 static intrhand_t isr[NINT] = { NULL };
@@ -17,22 +17,6 @@ idt_set_gate(struct gate_desc *gd, void *func, u_int sel, u_int dpl, u_int type)
 	addr = (u_int32_t)func;
 	gd->gd_hi = (addr & 0xffff0000) | SEGP | dpl | type;
 	gd->gd_lo = (sel << 16) | (addr & 0xffff);
-}
-
-/* TODO: explain. */
-static void
-pic_remap(void)
-{
-	outb(PIC_MASTER_CMD, 0x11);
-	outb(PIC_SLAVE_CMD, 0x11);
-	outb(PIC_MASTER_DATA, 0x20);
-	outb(PIC_SLAVE_DATA, 0x28);
-	outb(PIC_MASTER_DATA, 0x04);
-	outb(PIC_SLAVE_DATA, 0x02);
-	outb(PIC_MASTER_DATA, 0x01);
-	outb(PIC_SLAVE_DATA, 0x01);
-	outb(PIC_MASTER_DATA, 0x00);
-	outb(PIC_MASTER_DATA, 0x00);
 }
 
 extern void INTVEC(div), INTVEC(dbg), INTVEC(nmsk), INTVEC(bpt), INTVEC(ofl),
@@ -141,20 +125,13 @@ intr_handler(struct reg *r)
 {
 	intrhand_t handler;
 
-	/* TODO: dprintf? */
-	/* XXX: why did i write this in the first place???? */
-	if (r->r_intrno < ARRLEN(exceptmsg))
-		printf("sys: trap: %s\n", exceptmsg[r->r_intrno]);
 	if ((handler = isr[r->r_intrno]) != NULL)
 		handler(r);
 	else if (r->r_intrno < ARRLEN(exceptmsg)) {
 		dump_regs(r);
 		panic("%s: system halted\n", exceptmsg[r->r_intrno]);
 	}
-	/* EOI */
-	if (r->r_intrno >= 40)
-		outb(PIC_SLAVE_CMD, 0x20);
-	outb(PIC_MASTER_CMD, 0x20);
+	pic_eoi(r->r_intrno);
 }
 
 void
@@ -163,6 +140,7 @@ intr_register_handler(int intrno, intrhand_t handler)
 	if (intrno < 0 || intrno >= NINT)
 		panic("invalid interrupt number: %d\n", intrno);
 	isr[intrno] = handler;
+	pic_mask(intrno, PIC_CLEAR_MASK);
 }
 
 void
@@ -170,8 +148,8 @@ dump_regs(struct reg *r)
 {
 	printf("eax=%#08x\tebx=%#08x\tecx=%#08x\tedx=%#08x\n",
 	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);
-	printf("esp=%#08x\tebp=%#08x\tesi=%#08x\tedi=%#08x\n",
-	    r->r_esp, r->r_ebp, r->r_esi, r->r_edi);
+	printf("esi=%#08x\tedi=%#08x\tebp=%#08x\tesp=%#08x\n",
+	    r->r_esi, r->r_edi, r->r_ebp, r->r_esp);
 	printf("ds=%#08x \tes=%#08x \tfs=%#08x \tgs=%#08x\n",
 	    r->r_ds, r->r_es, r->r_fs, r->r_gs);
 	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%#08x\n",

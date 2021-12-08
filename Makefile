@@ -4,7 +4,7 @@ all:
 	cd kern && make install clean && cd -
 
 run:
-	qemu-system-i386 -hda ${TGTDIR}/os.bin -serial stdio
+	qemu-system-i386 -hda ${TGTDIR}/os.bin -d cpu -monitor stdio
 
 clean:
 	rm -rf ${TGTDIR}

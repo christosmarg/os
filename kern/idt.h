@@ -38,11 +38,6 @@
 #define UDSEL		SELECTOR(UDSEG, SELGDT, UPL)
 /* TODO: 9front mem.h */
 
-#define PIC_MASTER_CMD	0x20
-#define PIC_MASTER_DATA	(PIC_MASTER_CMD + 1)
-#define PIC_SLAVE_CMD	0xa0
-#define PIC_SLAVE_DATA	(PIC_SLAVE_CMD + 1)
-
 struct gate_desc {
 	u_int32_t gd_lo;
 	u_int32_t gd_hi;

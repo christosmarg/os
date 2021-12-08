@@ -66,4 +66,10 @@ sti(void)
 	__asm__ __volatile("sti");
 }
 
+static inline void
+io_wait(void)
+{
+	outb(0x80, 0);
+}
+
 #endif /* _IO_H_ */

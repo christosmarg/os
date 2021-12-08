@@ -2,6 +2,7 @@ ENTRY(_start)
 SECTIONS
 {
 	.text 0x1000 : {
+		*(text.prologue)
 		*(.text)
 		. = ALIGN(4096);
 	}

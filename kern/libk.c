@@ -358,7 +358,7 @@ printf(const char *fmt, ...)
 	va_start(ap, fmt);
 	n = vsprintf(buf, fmt, ap);
 	va_end(ap);
-	vga_write(buf);
+	vga_puts(buf);
 
 	return (n);
 }
@@ -376,7 +376,7 @@ panic(const char *fmt, ...)
 	va_start(ap, fmt);
 	n = vsprintf(buf, fmt, ap);
 	va_end(ap);
-	vga_write(buf);
+	vga_puts(buf);
 	vga_set_color(VGA_BLACK, VGA_WHITE);
 	hlt();
 }

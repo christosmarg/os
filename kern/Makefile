@@ -21,6 +21,7 @@ SRC= 		*.c *.s
 OBJ= 		kern_main.o \
 		libk.o \
 		idt.o \
+		pic.o \
 		intr.o \
 		vga.o \
 		kbd.o \

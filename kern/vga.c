@@ -77,7 +77,7 @@ vga_putc(char c)
 }
 
 void
-vga_write(const char *str)
+vga_puts(const char *str)
 {
 	while (*str != '\0')
 		vga_putc(*str++);
