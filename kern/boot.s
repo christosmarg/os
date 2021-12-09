@@ -13,6 +13,8 @@ section .text
 ; Entry point.
 _start:
 	cli			; Disable interrupts.
+	jmp	0x0000:zeroseg
+zeroseg:
 	xor	ax, ax		; Clear segment registers.
 	mov	ds, ax
 	mov	es, ax
@@ -64,10 +66,10 @@ a20_test:
 	pop	bx
 	
 	mov	bx, 0x7e0e
-	mov	dx, [es:bx]	; If the A20 line is disabled we get 0xaa55.
+	mov	dx, [es:bx]
 
 	cmp	ax, dx
-	je	cont		; If they're equal, the A20 line might be disabled.
+	je	cont		; If 0xaa55, the A20 line might be disabled.
 	popa
 	mov	ax, 0x01	; Success code 1.
 	ret
@@ -265,10 +267,17 @@ pm_init:
 	mov	gs, ax
 	mov	ss, ax
 
+	xor	eax, eax
+	mov	ebx, eax
+	mov	ecx, eax
+	mov	edx, eax
+	mov	esi, eax
+	mov	edi, eax
+	mov	ebp, kern_stack_bottom
 	mov	esp, kern_stack_top
 
 	; Hand control over to the C kernel. Godspeed! You Black Emperor.
-	call	KERNOFF
+	jmp	GDT_CODESEG:KERNOFF
 	jmp	$
 
 ; Print a null-terminated string.

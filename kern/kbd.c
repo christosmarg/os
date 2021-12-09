@@ -99,6 +99,10 @@ kbd_callback(struct reg *r)
 	if ((sc = inb(KBD_CMD)) & KBD_PRESSED) {
 	} else {
 		/* TODO: shift */
+		if (kbdus_lower[sc] == 'r') {
+			dump_regs(r);
+			return;
+		}
 		vga_putc(shift ? kbdus_upper[sc] : kbdus_lower[sc]);
 	}
 	UNUSED(r);

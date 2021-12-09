@@ -1,11 +1,11 @@
-TGTDIR=		build
+BINDIR=		build
 
 all:
 	cd kern && make install clean && cd -
 
 run:
-	qemu-system-i386 -hda ${TGTDIR}/os.bin -d cpu -monitor stdio
+	qemu-system-i386 -hda ${BINDIR}/os.img -d cpu -monitor stdio
 
 clean:
-	rm -rf ${TGTDIR}
+	rm -rf ${BINDIR}
 	cd kern && make clean && cd -

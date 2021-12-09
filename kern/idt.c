@@ -19,12 +19,16 @@ idt_set_gate(struct gate_desc *gd, void *func, u_int sel, u_int dpl, u_int type)
 	gd->gd_lo = (sel << 16) | (addr & 0xffff);
 }
 
-extern void INTVEC(div), INTVEC(dbg), INTVEC(nmsk), INTVEC(bpt), INTVEC(ofl),
+/*
+ * u_char so `-pedantic` won't complain about taking the
+ * address of `void`.
+ */
+extern u_char INTVEC(div), INTVEC(dbg), INTVEC(nmsk), INTVEC(bpt), INTVEC(ofl),
     INTVEC(bnd), INTVEC(ill), INTVEC(dna), INTVEC(dbl), INTVEC(fpusegm),
     INTVEC(tss), INTVEC(missing), INTVEC(stk), INTVEC(prot), INTVEC(page),
     INTVEC(rsvd), INTVEC(fpu), INTVEC(align), INTVEC(mchk), INTVEC(simd);
 
-extern void INTVEC(irq0), INTVEC(irq1), INTVEC(irq2), INTVEC(irq3),
+extern u_char INTVEC(irq0), INTVEC(irq1), INTVEC(irq2), INTVEC(irq3),
     INTVEC(irq4), INTVEC(irq5), INTVEC(irq6), INTVEC(irq7), INTVEC(irq8),
     INTVEC(irq9), INTVEC(irq10), INTVEC(irq11), INTVEC(irq12), INTVEC(irq13),
     INTVEC(irq14), INTVEC(irq15);
@@ -150,10 +154,10 @@ dump_regs(struct reg *r)
 	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);
 	printf("esi=%#08x\tedi=%#08x\tebp=%#08x\tesp=%#08x\n",
 	    r->r_esi, r->r_edi, r->r_ebp, r->r_esp);
-	printf("ds=%#08x \tes=%#08x \tfs=%#08x \tgs=%#08x\n",
-	    r->r_ds, r->r_es, r->r_fs, r->r_gs);
-	printf("eip=%#08x\tcs=%#08x \tss=%#08x \teflags=%#08x\n",
-	    r->r_eip, r->r_cs, r->r_ss, r->r_eflags);
+	printf("ds=%#04x \t\tes=%#04x \t\tfs=%#04x \t\tgs=%#04x\n",
+	    (u_short)r->r_ds, (u_short)r->r_es, (u_short)r->r_fs, (u_short)r->r_gs);
+	printf("cs=%#04x \t\tss=%#04x \t\teip=%#08x\teflags=%#08x\n",
+	    (u_short)r->r_cs, (u_short)r->r_ss, r->r_eip, r->r_eflags);
 	printf("int=%#08x\terr=%#08x\tuesp=%#08x\n",
 	    r->r_intrno, r->r_err, r->r_uesp);
 }
