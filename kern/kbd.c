@@ -12,7 +12,7 @@
 #define KBD_LSHIFT_REL	0xaa
 #define KBD_RSHIFT_REL	0xb6
 
-static void kbd_callback(struct reg *);
+static void kbd_callback(struct regs *);
 
 static u_char kbdus_upper[128] = {
 	0,	/* Error */
@@ -91,7 +91,7 @@ static u_char kbdus_lower[128] = {
 };
 
 static void
-kbd_callback(struct reg *r)
+kbd_callback(struct regs *r)
 {
 	u_int8_t sc;
 	int shift = 0;

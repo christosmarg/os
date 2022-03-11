@@ -9,7 +9,7 @@
 void
 pic_remap(void)
 {
-	u_char m1, m2;
+	u_int8_t m1, m2;
 
 	/* Save masks */
 	m1 = inb(PIC_MASTER_DATA);
@@ -51,7 +51,7 @@ pic_eoi(u_int32_t intrno)
 }
 
 void
-pic_mask(u_char irq, int flag)
+pic_mask(u_int8_t irq, int flag)
 {
 	u_int16_t port;
 	u_int8_t v;

@@ -27,7 +27,7 @@
 
 void		pic_remap(void);
 void		pic_eoi(u_int32_t);
-void		pic_mask(u_char, int);
+void		pic_mask(u_int8_t, int);
 void		pic_on(void);
 void		pic_off(void);
 

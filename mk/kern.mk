@@ -21,6 +21,7 @@ options:
 	@echo "CFLAGS	= ${CFLAGS}"
 	@echo "LDFLAGS	= ${LDFLAGS}"
 
+# TODO: boot, dd, kern, cat | start esp when 0x1000 | ld -T x2 | 2mb >>
 ${BIN}: ${OBJ}
 	mkdir -p ${BINDIR}
 	${AS} -fbin ${BOOT_FILE} -o ${BOOT_BIN}

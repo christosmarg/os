@@ -2,7 +2,7 @@
 #define _IDT_H_
 
 #include <u.h>
-#include <reg.h>
+#include <regs.h>
 
 #define INTVEC(name)	CONCAT(intr_, name)
 
@@ -67,11 +67,11 @@ enum {
 	IRQ15,
 };
 
-typedef void (*intrhand_t)(struct reg *);
+typedef void (*intrhand_t)(struct regs *);
 
 void idt_init(void);
-void intr_handler(struct reg *);
+void intr_handler(struct regs *);
 void intr_register_handler(int, intrhand_t);
-void dump_regs(struct reg *); /* FIXME: move elsewhere? */
+void dump_regs(struct regs *); /* FIXME: move elsewhere? */
 
 #endif /* _IDT_H_ */

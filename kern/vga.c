@@ -11,7 +11,7 @@
 
 struct vga {
 	volatile u_int16_t *buf;
-	size_t row;
+	size_t row;	/* XXX: signed? */
 	size_t col;
 	u_int8_t color;
 };
@@ -49,7 +49,8 @@ vga_putc(char c)
 		vga.col = 0;
 		break;
 	case '\b':
-		vga.col--;
+		if (vga.col > 0)
+			vga.col--;
 		vga.buf[vga.row * VGA_COLS + vga.col] = VGA_PUTC(' ');
 		break;
 	case '\r':
@@ -63,13 +64,13 @@ vga_putc(char c)
 		vga.col++;
 	}
 
-	if (vga.row >= VGA_ROWS) {
+	if (vga.row > VGA_ROWS) {
 		/* FIXME: scroll */
 		vga_clear(VGA_BLACK, VGA_WHITE);
 		vga.row = 0;
 		vga.col = 0;
 	}
-	if (vga.col >= VGA_COLS) {
+	if (vga.col > VGA_COLS) {
 		vga.row++;
 		vga.col = 0;
 	}

@@ -9,12 +9,12 @@
 #define FREQ		1193180
 #define HZ		100
 
-static void timer_callback(struct reg *);
+static void timer_callback(struct regs *);
 
 static u_int32_t ticks = 0;
 
 static void
-timer_callback(struct reg *r)
+timer_callback(struct regs *r)
 {
 	ticks++;
 	UNUSED(r);

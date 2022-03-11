@@ -1,7 +1,7 @@
 #ifndef _REG_H_
 #define _REG_H_
 
-struct reg {
+struct regs {
 	u_int32_t	r_gs;
 	u_int32_t	r_fs;
 	u_int32_t	r_es;

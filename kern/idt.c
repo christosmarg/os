@@ -125,7 +125,7 @@ static const char *exceptmsg[32] = {
 };
 
 void
-intr_handler(struct reg *r)
+intr_handler(struct regs *r)
 {
 	intrhand_t handler;
 
@@ -148,7 +148,7 @@ intr_register_handler(int intrno, intrhand_t handler)
 }
 
 void
-dump_regs(struct reg *r)
+dump_regs(struct regs *r)
 {
 	printf("eax=%#08x\tebx=%#08x\tecx=%#08x\tedx=%#08x\n",
 	    r->r_eax, r->r_ebx, r->r_ecx, r->r_edx);

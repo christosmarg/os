@@ -288,17 +288,17 @@ puts:
 loop:
 	mov	al, [si]	; Load character.
 	cmp	al, 0		; Check for \0.
-	jne	putchar		; If it's not \0, print the character.
+	jne	putc		; If it's not \0, print the character.
 	popa			; We're done, pop everything.
 	ret			; Return back to where we were.
-putchar:
+putc:
 	int	0x10		; BIOS print interrupt.
 	inc	si		; `str++`
 	jmp	loop		; Go to the next character.
 
 ; String declarations.
-str_diskerr:	db "Error loading disk.", 0x0a, 0x0d, 0x00
-str_a20_fail:	db "The A20 Line is disabled", 0x0a, 0x0d, 0x00
+str_diskerr:	db "disk err: load", 0x0a, 0x0d, 0x00
+str_a20_fail:	db "a20: disabled", 0x0a, 0x0d, 0x00
 
 ; Hard disk.
 BOOTDRV:	db 0x80
