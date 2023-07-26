@@ -25,10 +25,10 @@
 #define ICW4_BUF_MASTER	0x0c	/* Buffered master */
 #define ICW4_SFNM	0x10	/* Special fully nested */
 
-void		pic_remap(void);
-void		pic_eoi(u_int32_t);
-void		pic_mask(u_int8_t, int);
-void		pic_on(void);
-void		pic_off(void);
+void	pic_remap(void);
+void	pic_eoi(u_int32_t);
+void	pic_mask(u_int8_t, int);
+void	pic_on(void);
+void	pic_off(void);
 
 #endif /* _PIC_H_ */

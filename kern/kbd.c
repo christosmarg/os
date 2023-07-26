@@ -2,7 +2,7 @@
 #include "libk.h"
 #include "kbd.h"
 #include "idt.h"
-#include "io.h"
+#include "cpufunc.h"
 #include "vga.h"
 
 #define KBD_CMD		0x60
@@ -52,6 +52,10 @@ static u_char kbdus_upper[128] = {
 	0,	/* The rest are undefined */
 };
 
+/*
+ * XXX: is there a correlation so that we can do math instead of having 2
+ * tables?
+ */
 static u_char kbdus_lower[128] = {
 	0,	/* Error */
 	27,	/* Escape */

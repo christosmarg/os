@@ -1,7 +1,7 @@
 #include <libc.h>
 #include "libk.h"
 #include "idt.h"
-#include "io.h"
+#include "cpufunc.h"
 
 #define TIMER_CMD	0x43
 #define TIMER_DATA	0x40

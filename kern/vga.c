@@ -1,5 +1,5 @@
 #include "vga.h"
-#include "io.h"
+#include "cpufunc.h"
 
 #define VGA_MEM		0xb8000;
 #define VGA_COLS	80
@@ -11,7 +11,7 @@
 
 struct vga {
 	volatile u_int16_t *buf;
-	size_t row;	/* XXX: signed? */
+	size_t row;	/* XXX: why signed? */
 	size_t col;
 	u_int8_t color;
 };
@@ -40,6 +40,13 @@ vga_set_color(u_int8_t fg, u_int8_t bg)
 	vga.color = fg | (bg << 4);
 }
 
+/*
+ * TODO: page break
+ * https://en.wikipedia.org/wiki/Page_break
+ * https://en.wikipedia.org/wiki/Escape_sequences_in_C
+ *
+ * handle long lines (backspacing inside them as well)
+ */
 void
 vga_putc(char c)
 {
@@ -64,13 +71,13 @@ vga_putc(char c)
 		vga.col++;
 	}
 
-	if (vga.row > VGA_ROWS) {
-		/* FIXME: scroll */
+	if (vga.row > VGA_ROWS - 1) {
+		/* XXX: change page completely or push everything down one line? */
 		vga_clear(VGA_BLACK, VGA_WHITE);
 		vga.row = 0;
 		vga.col = 0;
 	}
-	if (vga.col > VGA_COLS) {
+	if (vga.col > VGA_COLS - 1) {
 		vga.row++;
 		vga.col = 0;
 	}

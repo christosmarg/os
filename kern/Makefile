@@ -13,7 +13,6 @@ OBJ= 		kern_main.o \
 		intr.o \
 		vga.o \
 		kbd.o \
-		timer.o \
-		vm_page.o
+		timer.o
 
 include	../mk/kern.mk

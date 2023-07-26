@@ -1,5 +1,5 @@
 #include "libk.h"
-#include "io.h"
+#include "cpufunc.h"
 #include "vga.h"
 
 #define ZEROPAD	0x01
@@ -368,13 +368,12 @@ panic(const char *fmt, ...)
 {
 	char buf[BUFSIZ];
 	va_list ap;
-	int n;
 
 	cli();
 	vga_set_color(VGA_RED, VGA_WHITE);
 	printf("panic: ");
 	va_start(ap, fmt);
-	n = vsprintf(buf, fmt, ap);
+	(void)vsprintf(buf, fmt, ap);
 	va_end(ap);
 	vga_puts(buf);
 	vga_set_color(VGA_BLACK, VGA_WHITE);

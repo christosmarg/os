@@ -1,7 +1,7 @@
 CC= 		cc
 AS= 		nasm
 LD= 		ld
-ARCH= 		i386 # FIXME: make this automatic
+ARCH= 		i386 # FIXME: make this automatic (?)
 ARCHINCDIR+= 	${PREFIX}/${ARCH}
 INCDIR+=	${PREFIX}/include
 CFLAGS+= 	-g -m32 -Wall -Wextra -Werror -pedantic -std=c99 -O2 \

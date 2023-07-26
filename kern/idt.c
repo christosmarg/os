@@ -2,7 +2,7 @@
 #include "libk.h"
 #include "idt.h"
 #include "pic.h"
-#include "io.h"
+#include "cpufunc.h"
 
 static void idt_set_gate(struct gate_desc *, void *, u_int, u_int, u_int);
 
@@ -20,8 +20,7 @@ idt_set_gate(struct gate_desc *gd, void *func, u_int sel, u_int dpl, u_int type)
 }
 
 /*
- * u_char so `-pedantic` won't complain about taking the
- * address of `void`.
+ * u_char so `-pedantic` won't complain about taking the address of `void`.
  */
 extern u_char INTVEC(div), INTVEC(dbg), INTVEC(nmsk), INTVEC(bpt), INTVEC(ofl),
     INTVEC(bnd), INTVEC(ill), INTVEC(dna), INTVEC(dbl), INTVEC(fpusegm),

@@ -1,6 +1,6 @@
 #include "pic.h"
 #include "idt.h"
-#include "io.h"
+#include "cpufunc.h"
 
 /* 
  * BIOS reserves IRQ 0 to 15 for the PIC. We need to remap it to non-reserved
